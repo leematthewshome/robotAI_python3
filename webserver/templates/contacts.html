@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script type="text/javascript" src="{{ url_for('static', filename='javascript/jquery-1.9.1.min.js') }}" ></script>
+<script language='javascript'>
+//display the search page when the user clicks button
+function addItem(){
+    $( "#frmFirstName" ).val("");
+    $( "#frmLastName" ).val("");
+    $( "#frmMobile" ).val("");
+    $( "#frmEmail" ).val("");
+    $( "#frmSoftPhone" ).val("");
+    $( "#frmWhiteList" ).val("");
+    $('#delbtn').hide();
+    window.location.href = "#openModal";
+}
+
+//refresh the page when the user clicks button
+function editItem(first, last){
+    first = encodeURI(first)
+    last = encodeURI(last)
+    $('#delbtn').show();
+    window.location.href = "contacts.html?first="+first+"&last="+last+"#openModal";
+}
+
+//Function to delete and event
+function deleteItem(){
+    //Get the form values necesary for a delete
+    pFirst = $( "#frmFirstName" ).val();
+    pLast = $( "#frmLastName" ).val();
+    pDel = 'true';
+    $.post("contacts_save.html", 
+        {
+            first: pFirst,
+            last: pLast,
+            del: "true"
+        }, 
+        function(result) {
+            if(result=='OK'){
+                window.location.href = "contacts.html";
+            }
+            else{
+                alert(result)
+            }
+    });
+}
+
+//Function to save an event or update
+function saveItem(){
+    //Get the remaining form values
+    pFirst = $( "#frmFirstName" ).val();
+    pLast = $( "#frmLastName" ).val();
+    pMobile = $( "#frmMobile" ).val();
+    pEmail = $( "#frmEmail" ).val();
+    pSoft = $( "#frmSoftPhone" ).val();
+    pWhite = $( "#frmWhiteList" ).val();
+
+    //need to add error checking here to ensure correct values have been filled out
+    if (pFirst=='' && pLast==''){
+        alert('You must provide a unique combination of First and/or Last name for each contact you create.');
+        return;
+    }
+
+    //Save event to the database to make it permanent
+    $.post("contacts_save.html", 
+        {
+            first: pFirst,
+            last: pLast,
+            mobile: pMobile,
+            email: pEmail,
+            soft: pSoft,
+            white: pWhite
+        }, 
+        function(result) {
+            if(result=='OK'){
+                window.location.href = "contacts.html";
+            }
+            else{
+                alert(result)
+            }
+    });
+}
+</script>
+
+<div class="container" >
+   <div class="spacer-sml">&nbsp</div>
+
+    <div class='row'>
+        <div class='nine columns'><h5>Contact List</h5></div>
+        <div class='three columns'><button class='button-primary' onClick='addItem()'>Add New</button></div>
+    </div>
+    
+    {{ body|safe }}
+
+</div>
+
+<!-- Modal Dialog Form for data entry
+=========================================================================================== -->
+<div id="openModal" class="modalDialog">
+<div style='width:450pt;'>
+<table border='0' width='100%'>
+<tr>
+  <td width='15%' valign='top'>
+	<a href="contacts.html" class='button butcls' title="close" class="close">Cancel</a>
+  </td>
+  <td valign='top' style='text-align: center;'>
+	<h5>Add / Edit Contact</h5>
+  </td>
+  <td width='15%' valign='top' style='text-align: right;'>
+	<button class='button butdel' id='delbtn' onClick='deleteItem()'>Delete</button>
+  </td>
+<tr>
+<tr>
+  <td colspan=3 style='padding: 0px 0px 0px 0px; text-align: right;'>
+
+    {{ form|safe }}
+
+  <button class='button butsav' onClick='saveItem()'>Save Record</button>
+  </td>
+</tr>
+</table>
+</div>
+</div>
+<!-- End Modal Dialog for data entry
+==================================================================================== -->
+{% endblock %}

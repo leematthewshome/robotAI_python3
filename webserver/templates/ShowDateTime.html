@@ -1,0 +1,68 @@
+<HTML>
+<HEAD>
+	<style>
+		.outer{
+			margin-right:auto;
+			margin-left:auto;
+			margin-top:auto;
+			margin-bottom:auto;
+		}
+		.blank { 
+			font-size: 20vh;
+		}
+		.time { 
+			font-family:Arial;
+			font-size: 20vh;
+			text-align:center;
+		}
+		.date { 
+			font-family:Arial;
+			font-size: 20vh;
+			text-align:center;
+		}
+	</style>		
+	<script langauge='javascript'>
+		var sTime = '';
+		var sDate = '';
+		
+		Date.locale = {
+			en: {
+			   month_names: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+			}
+		};
+
+		//new date function create Month String
+		Date.prototype.getMonthName = function(lang) {
+			lang = lang && (lang in Date.locale) ? lang : 'en';
+			return Date.locale[lang].month_names[this.getMonth()];
+		};	
+		
+		function getDateTime(){
+			var cur = new Date();
+			
+			//Create Time String (Need to add AM or PM)
+			var mins = '0' + cur.getMinutes().toString()
+			mins = mins.substr(mins.length - 2);
+			sTime  = cur.getHours().toString() + ':' + mins
+			
+			//create date string
+			sDate = cur.getDate() + ' ' + cur.getMonthName() + ' ' + cur.getFullYear()
+		}
+		
+		function setContent(){
+			getDateTime();
+			document.getElementById("tme").innerHTML = sTime;
+			document.getElementById("dte").innerHTML = sDate;	
+			setTimeout(setContent, 1000);
+		}
+	</script>
+</HEAD>
+<BODY onload="setContent()">
+  <DIV class="outer">
+	<div class="blank">&nbsp</div>
+	<div class="time" id="tme"></div>
+	<div class="date" id="dte"></div>	
+  </DIV>
+</BODY>
+
+</HTML>

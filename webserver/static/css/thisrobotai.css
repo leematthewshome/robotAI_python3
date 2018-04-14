@@ -1,0 +1,87 @@
+.spacer-sml {
+	line-height:3vh;
+	height:3vh;
+}
+.spacer-med {
+	line-height:4vh;
+	height:4vh;
+}
+.spacer-lge {
+	line-height:5vh;
+	height:5vh;
+}
+.uline {
+	border-bottom: 1px solid
+}
+.centered {
+	text-align: center;
+}
+.righted {
+	text-align: right;
+}
+.menu_icon{
+	z-index:2;
+	position: absolute;
+	top: 0px;
+	left: 10px;
+}
+.sideNav{
+	z-index:1;
+	position:fixed;
+	top:0;
+	left:0;
+	height:100%;
+	width:0;
+	background-color:#ffffff;
+	border-right:solid #05A7F7;
+	overflow-x:hidden;
+	transition:0.5s;
+}
+.menuButton{
+	width: 100%; 
+	text-align: left; 
+	font-size: 1.8rem;
+	margin-bottom: 1rem;
+}
+.modalDialog {
+	position: fixed;
+	font-family: Arial,Helvetica,sans-serif;
+	top:0;
+	right:0;
+	bottom:0;
+	left:0;
+	background:rgba(0,0,0,0.8);
+	z-index:9999;
+	opacity:0;
+	-webkit-transition:opacity 400ms ease-in;
+	-moz-transition:opacity 400ms ease-in;
+	transition:opacity 400ms ease-in;
+	pointer-events:none;
+}
+.modalDialog:target{
+	opacity:1;
+	pointer-events:auto;
+}
+.modalDialog > div{
+	font-size:14pt;
+	position:relative;
+	margin:5% auto;
+	padding: 5px 20px 10px 20px;
+	border-radius:10px;
+	background: #fff;
+	background: -moz-linear-gradient(#fff, #999);
+	background: -webkit-linear-gradient(#fff, #999);
+	background: -o-linear-gradient(#fff, #999);
+}
+.butdel {
+	background-color:#FA5555;
+	color: #ffffff;
+}
+.butsav {
+	background-color:#348729;
+	color: #ffffff;
+}
+.butcls {
+	background-color:#777877;
+	color: #ffffff;
+}

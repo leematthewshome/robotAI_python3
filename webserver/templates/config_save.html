@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" >
+  <div class="spacer-lrg">&nbsp</div>
+  <div class="spacer-lrg">&nbsp</div>
+  <div class="spacer-lrg">&nbsp</div>
+  <div class='row'>
+    <div class='twelve columns centered'>
+
+    {{ message|safe }}
+
+	</div>
+  </div>
+  <div class="spacer-lrg">&nbsp</div>
+  <div class="spacer-lrg">&nbsp</div>
+  <div class='row'>
+    <div class='twelve columns centered'>
+    <a class="button button-primary" href="config.html">Click or Tap here to return</a>
+	</div>
+  </div>
+</div>
+{% endblock %}
+

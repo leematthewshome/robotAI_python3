@@ -1,0 +1,30 @@
+<HTML> 
+<HEAD>
+	<!-- CSS
+	----------------------------------------------- -->
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/thisrobotai.css') }}">
+    <style>
+    .config {
+        min-width: 350px;
+    }
+    .menu {
+        font-size: 1.8rem;
+    }
+    </style>
+</HEAD> 
+<BODY> 
+<div class="container" >
+    <div class="spacer-sml">&nbsp</div>
+    <div class='row'>
+        <div class='four columns lefted'><a href='index.html'><img src='{{ url_for('static', filename = 'img/logo_name.png') }}' style='height:35px'></a></div>
+        <div class='one column righted'>&nbsp</div>
+        <div class='six columns lefted'><h5><b>Raspberry Pi Setup</b></h5></div>
+        <div class='one column righted'><a href='index.html'><img src='{{ url_for('static', filename = 'img/home.png') }}' style='height:35px'></a></div>
+    </div>
+</div>
+<hr>
+{% block content %}{% endblock %}
+</BODY>
+</HTML>
