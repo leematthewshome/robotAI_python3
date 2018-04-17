@@ -1,15 +1,13 @@
 # robotAI_python3
-robotAI home automation and robotics platform
+robotAI home automation and robotics platform. For more details reference the RobotAI website here https://thisrobotai.com/
 
-This is a work in progress. I am updating my own platform to make it Pythin3 compatible and to add more functionality.
-
+This is a work in progress. I am updating my own platform to make it Python3 compatible and to add more functionality.
 
 Loose instructions to install into virtual environment
 
 
 # if using python 3.4 install virtual env
 sudo apt-get install python3.4-dev python3.4-venv
-
 
 # create virtual environment named 'virtual'
 mkdir robotAI3
