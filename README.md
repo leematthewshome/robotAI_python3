@@ -19,6 +19,8 @@ source virtual/bin/activate
 pip3 install flask
 
 # install other required modules
+
+sudo apt-get install python3-pyaudio
 pip3 install requests
 pip3 install serial
 *ensure the libportaudio dependencies are also installed
