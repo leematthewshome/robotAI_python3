@@ -4,6 +4,7 @@ robotAI home automation and robotics platform. For more details reference the Ro
 This is a work in progress. I am updating my own platform to make it Python3 compatible and to add more functionality.
 
 # Instructions to install into virtual environment - Raspbian Jessie used
+(bah!!! virtual environment wont seem to install pyaudio)
 
 --If using python 3.4 install virtual env
 
@@ -22,7 +23,7 @@ This is a work in progress. I am updating my own platform to make it Python3 com
 source virtual/bin/activate
 
 
-# Instructions to install necessary libraries
+# Instructions to install necessary pre-requisites and libraries
 
 --install required libraries for audio onto raspberry pi
 
@@ -40,21 +41,21 @@ sudo apt-get install mplayer -y
 
 --install these python modules (activate virtual environment first if using)
 
-pip3 install flask
+sudo pip3 install flask
 
 --install pythion libraries leveraged by various modules
 
 ///this one seems to error : pip3 install semantic
 
-pip3 install pytz
+sudo pip3 install pytz
 
-pip3 install PyDictionary
+sudo pip3 install PyDictionary
 
 * note that some errors seem to result when installing falsk but these seem to be OK
 
-pip3 install requests
+sudo pip3 install requests
 
-pip3 install serial
+sudo pip3 install serial
 
 
 
