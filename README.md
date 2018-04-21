@@ -26,17 +26,29 @@ source virtual/bin/activate
 
 --install required libraries for audio onto raspberry pi
 
-sudo apt-get install python3-pyaudio
+sudo apt-get install python3-pyaudio python-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
 
-sudo apt-get install python-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
+pip install --allow-unverified=pyaudio pyaudio
 
 --install text to speech software 
 
 sudo apt-get install espeak flite libttspico0 libttspico-utils libttspico-data -y
 
+--install software for playing music
+
+sudo apt-get install mplayer -y
+
 --install these python modules (activate virtual environment first if using)
 
 pip3 install flask
+
+--install pythion libraries leveraged by various modules
+
+///this one seems to error : pip3 install semantic
+
+pip3 install pytz
+
+pip3 install PyDictionary
 
 * note that some errors seem to result when installing falsk but these seem to be OK
 
@@ -44,8 +56,8 @@ pip3 install requests
 
 pip3 install serial
 
---not sure the following are actually needed
-pip install --allow-unverified=pyaudio pyaudio
+
+
 
 
 
