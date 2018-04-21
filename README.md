@@ -24,11 +24,15 @@ source virtual/bin/activate
 
 # Instructions to install necessary libraries
 
---install required libraries onto raspberry pi
+--install required libraries for audio onto raspberry pi
 
 sudo apt-get install python3-pyaudio
 
 sudo apt-get install python-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
+
+--install text to speech software 
+
+sudo apt-get install espeak flite libttspico0 libttspico-utils libttspico-data -y
 
 --install these python modules (activate virtual environment first if using)
 
