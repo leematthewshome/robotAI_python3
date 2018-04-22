@@ -23,12 +23,8 @@ class webServer(object):
     def __init__(self, ENVIRON, SENSORQ, MIC):
         #setup global variables
         self.websrvApp = Flask(__name__)
-        #self.TOPDIR = ENVIRON["topdir"]
-        #self.HOTWORD_PATH = os.path.join(self.TOPDIR, "static/hotwords/")
-        self.TOPDIR = '/home/pi/robotAI3/'
-        self.HOTWORD_PATH = '/home/pi/robotAI3/static/hotwords/'
-        print(self.TOPDIR)
-        print(self.HOTWORD_PATH)
+        self.TOPDIR = ENVIRON["topdir"]
+        self.HOTWORD_PATH = os.path.join(self.TOPDIR, "static/hotwords/")
         self.ENVIRON = ENVIRON
         self.SENSORQ = SENSORQ
         self.MIC = MIC
@@ -252,7 +248,7 @@ class webServer(object):
 
         #now kick off the server
         #-----------------------------------------------------
-        self.websrvApp.run(host= '0.0.0.0', debug=True)
+        self.websrvApp.run(host= '0.0.0.0', debug=False)
 
 
         
@@ -263,11 +259,13 @@ def doWebserver(ENVIRON, SENSORQ, MIC):
     webApp = webServer(ENVIRON, SENSORQ, MIC)
     webApp.runWebserver()
 
-       
+
+    
         
 # Allow to manually run the web server in isolation using the below
 if __name__ == "__main__":
-    ENVIRON = 0
+    ENVIRON = {}
+    ENVIRON["topdir"] = "/home/pi/"
     SENSORQ = 0
     MIC = 0
     webApp = webServer(ENVIRON, SENSORQ, MIC)
