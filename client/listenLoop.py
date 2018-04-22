@@ -12,10 +12,14 @@ import logging
 import signal
 import os
 import time
-# allow for running sensor directly for debug
-if not __name__ == "__main__":
-    import client.app_utils
-    import client.snowboy.snowboydecoder
+#allow for running listenloop either in isolation or via robotAI.py
+try:
+    from client import app_utils
+    from client.snowboy import snowboydecoder
+except:
+    import app_utils
+    from snowboy import snowboydecoder
+
 
 
 #======================================================
@@ -162,26 +166,29 @@ def doListen(ENVIRON, SENSORQ, MIC):
 
 
     
-# Allow to manually run the sensor in isolation using the below
-#---------------------------------------------------------------
-class Mic(object):
-    def say(self, text):
-        print(text)
 
-    def activeListenToAllOptions(self):
-        print("running activeListenToAllOptions")
 
 if __name__ == "__main__":
-    import app_utils
-    import snowboy.snowboydecoder
+    print("Starting listenLoop from __main__ procedure")
+    # Allow to manually run the sensor in isolation using the below
+    class Mic(object):
+        def say(self, text):
+            print(text)
+
+        def activeListenToAllOptions(self):
+            print("running activeListenToAllOptions")
+        
+    snowboydecoder.play_audio_file()
     #set up ENVIRON object
     ENVIRON = {}
     ENVIRON["topdir"] = "/home/pi/robotAI3"
+    ENVIRON["listen"] = True        
     #setup QUEUE object
-    import Queue
-    SENSORQ = Queue.Queue()
+    print("Importing multiprocessing functions")
+    from multiprocessing import Process, Manager, Queue
+    SENSORQ = Queue()
     #setup MIC object
     MIC = Mic()
-    sensor = listenLoop(ENVIRON, SENSORQ, MIC)
-    sensor.doListen()
+    print("calling doListen function")
+    doListen(ENVIRON, SENSORQ, MIC)
 
