@@ -228,15 +228,31 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------
     # Start web server to allow user to edit configuration
     # ---------------------------------------------------------------------------------------
-    #MIC.say('Starting the web service.')
-    #logger.info("STARTING WEB SERVER")
-    #try:
-    #    from webserver import webserver
-    #    w = Process(target=webserver.doWebserver, args=(ENVIRON, SENSORQ, MIC, ))
-    #    w.start()
-    #except:
-    #    MIC.say("There was an error starting the webserver. It will not be possible to setup the system.")
+    MIC.say('Starting the web service.')
+    logger.info("STARTING WEB SERVER")
+    try:
+        from webserver import webserver
+        w = Process(target=webserver.doWebserver, args=(ENVIRON, SENSORQ, MIC, ))
+        w.start()
+    except:
+        MIC.say("There was an error starting the webserver. It will not be possible to access the system configuration pages.")
 
+        
+    # ---------------------------------------------------------------------------------------
+    # kick off listen process if web exists and config = TRUE
+    # ---------------------------------------------------------------------------------------
+    if isWWWeb and getConfig(cfg_listen, "Listen_1enable")=='TRUE':
+        MIC.say('I am now starting my Listen sensor. Just say, %s, and I will listen for your command. ' % robotName)
+        logger.info("STARTING THE LISTEN SENSOR")
+        try:
+            from client import listenLoop
+            l = Process(target=listenLoop.doListen, args=(ENVIRON, SENSORQ, MIC, ))
+            l.start()
+        except:
+            MIC.say("There was an error starting the Listen sensor. I cannot accept voice commands.")
+    cfg_listen = None
+
+        
     # ---------------------------------------------------------------------------------------
     # kick off timer process based on enabled = TRUE
     # ---------------------------------------------------------------------------------------
@@ -252,6 +268,7 @@ if __name__ == '__main__':
         except:
             MIC.say("There was an error starting the Timer sensor. No scheduled tasks or alarms will be possible.")
     cfg_timer = None
+    
     
     # now call Queue loop to monitor results from remote sensor processes
     # NOTE: This should be the very last operation as it runs constantly
