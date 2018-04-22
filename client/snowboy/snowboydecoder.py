@@ -2,7 +2,6 @@
 
 import collections
 import pyaudio
-import snowboydetect
 import time
 import wave
 import os
@@ -12,6 +11,12 @@ from contextlib import contextmanager
 
 #Lee AutoLevel - Import library for rms
 import audioop
+
+#allow for running listenloop either in isolation or via robotAI.py
+try:
+    from client.snowboy import snowboydetect
+except:
+    from snowboy import snowboydetect
 
 logging.basicConfig()
 logger = logging.getLogger("snowboy")
@@ -93,12 +98,13 @@ class HotwordDetector(object):
     :param audio_gain: multiply input volume by this factor.
     :param apply_frontend: applies the frontend processing algorithm if True.
     """
-
+    #Lee added debugLevel=None and ENVIRON=None to the input parameters
     def __init__(self, decoder_model,
                  resource=RESOURCE_FILE,
                  sensitivity=[],
                  audio_gain=1,
                  apply_frontend=False,
+                 debugLevel=None,
                  ENVIRON=None):
                  
         #Lee added logic around debug level
