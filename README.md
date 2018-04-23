@@ -3,7 +3,7 @@ robotAI home automation and robotics platform. For more details reference the Ro
 
 This is a work in progress. I am updating my own platform to make it Python3 compatible and to add more functionality.
 
-# Instructions to install into virtual environment - Raspbian Jessie used
+# Instructions to install into virtual environment - Raspbian Stretch used (Jessie seems to give problems)
 (bah!!! virtual environment wont seem to install pyaudio)
 
 --If using python 3.4 install virtual env
@@ -45,8 +45,6 @@ sudo pip3 install flask
 
 --install pythion libraries leveraged by various modules
 
-///this one seems to error : pip3 install semantic
-
 sudo pip3 install pytz
 
 sudo pip3 install PyDictionary
@@ -57,6 +55,7 @@ sudo pip3 install requests
 
 sudo pip3 install serial
 
+--This one gives an error   sudo pip3 install urllib2
 
 
 
