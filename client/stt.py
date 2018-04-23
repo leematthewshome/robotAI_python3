@@ -33,8 +33,9 @@ class robotAI_stt():
     def transcribe(self, fp):
         # prepare speech for sending
         data = fp.read()
-        speech_content = base64.b64encode(data)
-        # print speech_content
+        speech_content_bytes = base64.b64encode(data)
+        speech_content = speech_content_bytes.decode('utf-8')
+        print(speech_content)
 
         jsonpkg = {'subscriberID': self.api_login,
                   'token': self.api_token,
@@ -48,25 +49,23 @@ class robotAI_stt():
         headers = {'Content-Type': 'application/json'}
         try:
             r = requests.post(self.api_apiurl, data=json.dumps(jsonpkg), headers=headers, verify=True)
+            if r.status_code == 200:
+                try:
+                    text = r.json()["results"][0]["alternatives"][0]["transcript"]
+                    transcribed.append(text.upper())
+                except:
+                    self.logger.critical('Could not parse response from API.', exc_info=True)
+                    transcribed.append('APIERROR1')
+            else:
+                self.logger.critical('Request failed with response: %r', r.text, exc_info=True)
+                transcribed.append('APIERROR2')
         # handle where the request times out for some reason
         except requests.exceptions.Timeout:
             transcribed.append('APIERROR3')
         # handle all other exceptions
         except:
-            transcribed.append('APIERROR1')
+            transcribed.append('APIERROR4')
 
-        if r.status_code == 200:
-            try:
-                text = r.json()["results"][0]["alternatives"][0]["transcript"]
-                transcribed.append(text.upper())
-            except:
-                self.logger.critical('Could parse response from API.', exc_info=True)
-                # ToDO Interpret and handle this error in the Brain Logic
-                transcribed.append('APIERROR2')
-        else:
-            self.logger.critical('Request failed with response: %r', r.text, exc_info=True)
-            # ToDO Interpret and handle this error in the Brain Logic
-            transcribed.append('APIERROR1')
 
         print('API Transcribed: %r', transcribed)
         return transcribed

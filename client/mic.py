@@ -91,7 +91,7 @@ class Mic:
         waitVal = 30
         lastN = [THRESHOLD * waitVal for i in range(waitVal)]
 
-        for i in range(0, RATE / CHUNK * LISTEN_TIME):
+        for i in range(0, int(RATE / CHUNK * LISTEN_TIME)):
             data = stream.read(CHUNK)
             frames.append(data)
             score = self.getScore(data)
@@ -118,7 +118,7 @@ class Mic:
                 wav_fp.setnchannels(1)
                 wav_fp.setsampwidth(pyaudio.get_sample_size(pyaudio.paInt16))
                 wav_fp.setframerate(RATE)
-                wav_fp.writeframes(''.join(frames))
+                wav_fp.writeframes(b''.join(frames))
                 wav_fp.close()
                 f.seek(0)
                 self._logger.debug("Calling self.active_stt_engine.transcribe(f)")

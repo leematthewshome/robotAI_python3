@@ -131,13 +131,16 @@ class listenLoop(object):
         input = ', '.join(input)
         #check whether a valid response was received from the API and send to brain for processing
         if 'APIERROR1' in input:
-            self.mic.say('Sorry. There was a problem accessing the robot A I website to convert your speech into text')
+            self.mic.say('Sorry. I did not understand that.')
             self.ENVIRON["listen"] = True
         elif 'APIERROR2' in input:
-            self.mic.say('Sorry. I did not understand that. Please try again')
+            self.mic.say('Sorry. There was a problem with the speech to text engine.')
             self.ENVIRON["listen"] = True
         elif 'APIERROR3' in input:
-            self.mic.say('Hmmn. A timely response was not received from the robot A I website to convert your speech into text. Perhaps try again.')
+            self.mic.say('Hmmn. A timely response was not received from the speech to text engine. Perhaps try again.')
+            self.ENVIRON["listen"] = True
+        elif 'APIERROR4' in input:
+            self.mic.say('Sorry. Something went wrong.')
             self.ENVIRON["listen"] = True
         else:
             self.SENSORQ.put(['brain', input])
