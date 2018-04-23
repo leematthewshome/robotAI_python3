@@ -2,7 +2,6 @@
 import datetime
 import re
 import os
-from semantic.dates import DateService
 from pytz import timezone
 from client.app_utils import uzbl_goto
 from client.app_utils import getConfigData
@@ -22,9 +21,8 @@ def handle(text, mic, ENVIRON):
 
     tz = getTimezone()
     now = datetime.datetime.now(tz=tz)
-    service = DateService()
-    response = service.convertTime(now)
-
+    response = convertTime(now)
+    
     mic.say("It is %s right now." % response)
 
 
@@ -44,3 +42,27 @@ def getTimezone():
     except:
         return None
 
+        
+# create time text from datetime object
+def convertTime(now):
+    hr = now.time().hour
+    # work out minutes text
+    min = now.time().minute
+    if min < 10:
+        minTxt = '0' + str(min)
+    else:
+        minTxt = str(min)
+    # work out AM or PM and hour text
+    if hr > 12 or hr == 0:
+        suffix = 'PM'
+        if hr == 0:
+            hr = 12
+        else:
+            hr = hr - 12
+    else:
+        suffix = 'AM'
+    
+    hrTxt = str(hr)
+    result = '%s %s %s' % (hrTxt, minTxt, suffix)
+    return result
+    
