@@ -296,6 +296,7 @@ if __name__ == '__main__':
     # now call Queue loop to monitor results from remote sensor processes
     # NOTE: This should be the very last operation as it runs constantly
     # ---------------------------------------------------------------------------------------
+    sensorLoop(MIC, BRAIN, ENVIRON)    
 
     
     
