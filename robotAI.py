@@ -249,8 +249,7 @@ if __name__ == '__main__':
         logger.info("STARTING THE LISTEN SENSOR")
         try:
             from client import listenLoop
-            blahblah = ENVIRON
-            l = Process(target=listenLoop.doListen, args=(blahblah, SENSORQ, MIC, ))
+            l = Process(target=listenLoop.doListen, args=(ENVIRON, SENSORQ, MIC, ))
             l.start()
         except:
             MIC.say("There was an error starting the Listen sensor. I cannot accept voice commands.")
@@ -267,8 +266,7 @@ if __name__ == '__main__':
         ENVIRON["timerCache"] = False   # flags whether the alert cache is up to date or not
         try:
             from client import timerLoop
-            whatever = ENVIRON
-            t = Process(target=timerLoop.doTimer, args=(whatever, SENSORQ, MIC, ))
+            t = Process(target=timerLoop.doTimer, args=(ENVIRON, SENSORQ, MIC, ))
             t.start()
         except:
             MIC.say("There was an error starting the Timer sensor. No scheduled tasks or alarms will be possible.")
@@ -284,8 +282,7 @@ if __name__ == '__main__':
         logger.info("STARTING THE WEB SOCKET SENSOR")
         try:
             from client import serverSocket
-            bollocks = ENVIRON
-            s = Process(target=serverSocket.doSensor, args=(bollocks, SENSORQ, MIC, ))
+            s = Process(target=serverSocket.doSensor, args=(ENVIRON, SENSORQ, MIC, ))
             s.start()
         except:
             MIC.say("There was an error connecting to the Robot A I server. ")
