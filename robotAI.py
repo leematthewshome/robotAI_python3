@@ -173,6 +173,9 @@ if __name__ == '__main__':
             tries = tries - 1
             time.sleep(3)
 
+    # Need to check if a valid licence exists for the roboAT online APIs
+    #---------------------------------------------------------------------
+
     #set values shared across processes (fetch Listen config as we need it for stt_api)
     cfg_listen = getConfigData(TOPDIR, "Listen")
     mgr = Manager()
@@ -188,6 +191,7 @@ if __name__ == '__main__':
     ENVIRON["api_token"] = getConfig(cfg_general, "General_api_token")      #token for access
     ENVIRON["api_login"] = getConfig(cfg_general, "General_api_login")      #subscriber login
     ENVIRON["api_url"]   = getConfig(cfg_general, "General_api_url")        #API root entry point
+    ENVIRON["devicename"]  = getConfig(cfg_general, "General_devicename")   #Identity of this device (eg. Doorbell, Home Assistant, etc.)
 
     #setup queue shared across functions
     SENSORQ = Queue()
@@ -208,6 +212,7 @@ if __name__ == '__main__':
     # Brain is used to handle jobs that are taken from the SENSORQ
     BRAIN = brain.brain(MIC, ENVIRON)
 
+
     # Say hello or let the user know if there were problems
     #---------------------------------------------------------------------
     config = getConfigData(TOPDIR, "Listen")
@@ -222,8 +227,6 @@ if __name__ == '__main__':
         salutation = salutation + " This is because I could not connect to the internet."
     MIC.say(salutation)
 
-    #ToDo Check for connectivity to the RobotAI Website to determine if we have credentials / access
-
     
     # ---------------------------------------------------------------------------------------
     # Start web server to allow user to edit configuration
@@ -236,7 +239,7 @@ if __name__ == '__main__':
         w.start()
     except:
         MIC.say("There was an error starting the webserver. It will not be possible to access the system configuration pages.")
-
+        
         
     # ---------------------------------------------------------------------------------------
     # kick off listen process if web exists and config = TRUE
@@ -246,7 +249,8 @@ if __name__ == '__main__':
         logger.info("STARTING THE LISTEN SENSOR")
         try:
             from client import listenLoop
-            l = Process(target=listenLoop.doListen, args=(ENVIRON, SENSORQ, MIC, ))
+            blahblah = ENVIRON
+            l = Process(target=listenLoop.doListen, args=(blahblah, SENSORQ, MIC, ))
             l.start()
         except:
             MIC.say("There was an error starting the Listen sensor. I cannot accept voice commands.")
@@ -263,14 +267,35 @@ if __name__ == '__main__':
         ENVIRON["timerCache"] = False   # flags whether the alert cache is up to date or not
         try:
             from client import timerLoop
-            t = Process(target=timerLoop.doTimer, args=(ENVIRON, SENSORQ, MIC, ))
+            whatever = ENVIRON
+            t = Process(target=timerLoop.doTimer, args=(whatever, SENSORQ, MIC, ))
             t.start()
         except:
             MIC.say("There was an error starting the Timer sensor. No scheduled tasks or alarms will be possible.")
     cfg_timer = None
     
     
+    # ---------------------------------------------------------------------------------------
+    # kick off Robot AI webSocket listener based on enabled = TRUE
+    # ---------------------------------------------------------------------------------------
+    cfg_socket = getConfigData(TOPDIR, "WebSocket")
+    if getConfig(cfg_socket, "WebSocket_1enable")=='TRUE':
+        MIC.say('Connecting to the Robot A I server, for remote access and other functionality.')
+        logger.info("STARTING THE WEB SOCKET SENSOR")
+        try:
+            from client import serverSocket
+            bollocks = ENVIRON
+            s = Process(target=serverSocket.doSensor, args=(bollocks, SENSORQ, MIC, ))
+            s.start()
+        except:
+            MIC.say("There was an error connecting to the Robot A I server. ")
+    cfg_socket = None
+
+    
+    # ---------------------------------------------------------------------------------------
     # now call Queue loop to monitor results from remote sensor processes
     # NOTE: This should be the very last operation as it runs constantly
-    # ---------------------------------------------------------------------
-    sensorLoop(MIC, BRAIN, ENVIRON)
+    # ---------------------------------------------------------------------------------------
+
+    
+    
