@@ -12,7 +12,11 @@ import requests
 import os
 import datetime
 import time
-from client.app_utils import sendToRobotAPI, getConfigData, getConfig
+#allow for running listenloop either in isolation or via robotAI.py
+try:
+    from client.app_utils import sendToRobotAPI, getConfigData, getConfig
+except:
+    from app_utils import sendToRobotAPI, getConfigData, getConfig
 import pickle
 
 class timerLoop(object):
@@ -20,7 +24,9 @@ class timerLoop(object):
     def __init__(self, ENVIRON, SENSORQ, MIC):
         self.Mic = MIC
         self.ENVIRON = ENVIRON
+        self.SENSORQ = SENSORQ
         self.TOPDIR = ENVIRON["topdir"]
+        self.api_url = ENVIRON["api_url"]
         self.api_token = ENVIRON["api_token"]
         self.api_login = ENVIRON["api_login"]
         filename = os.path.join(self.TOPDIR, "static/sqlite/robotAI.sqlite")
@@ -45,12 +51,9 @@ class timerLoop(object):
             self.logger.level = logging.DEBUG
         else:
             self.logger.level = logging.INFO
-        self.ENVIRON = ENVIRON
-        self.SENSORQ = SENSORQ
         self.alertCache = {}                    #list of alerts that we need to monitor for exipry
         self.expiryCache = {}                   #list containing last run of expiry alerts
         self.curDate = datetime.date.today()    #used to compare to now() to determine if day has changed
-        self.api_url = ENVIRON["api_url"]
 
 
     # Function used to fetch alerts and jobs from cache
@@ -78,9 +81,11 @@ class timerLoop(object):
             self.logger.warning("No scheduled alerts or jobs found for today.")
             return True
         else:
-            #save our list for access by the handle function
-            with open('/home/pi/robotAI/static/alerts.p', 'wb') as f:
+            filename = os.path.join(self.TOPDIR, "static/alerts.p")
+            #save our list for access by the handle function 
+            with open(filename, 'wb') as f:
                 pickle.dump(rows, f)
+            
 
         # loop through rows and enter values into cache.
         # NOTE THAT ORDER OF VALUES IN LIST RETURNED BY API MATTERS  ***********
@@ -208,3 +213,31 @@ def doTimer(ENVIRON, SENSORQ, MIC):
     loop = timerLoop(ENVIRON, SENSORQ, MIC)
     loop.runLoop()
 
+
+    
+    # code to test this sensor independently
+#--------------------------------------------------------------------
+if __name__ == "__main__":
+    # Allow to manually run the sensor in isolation using the below
+    class Mic(object):
+        def say(self, text):
+            print(text)
+
+        def activeListenToAllOptions(self):
+            print("running activeListenToAllOptions")
+
+    #set up ENVIRON object
+    ENVIRON = {}
+    ENVIRON["api_url"] = 'https://thisrobotai.com/api'
+    ENVIRON["topdir"] = "/home/pi/robotAI3"
+    ENVIRON["api_token"] = 'H1G2F3D4R5T6H7K8H9F0DSAOYTREDBHH'        
+    ENVIRON["api_login"] = 'lee.matthews.home'
+    ENVIRON["listen"] = True        
+    ENVIRON["timerCache"] = False
+    #setup QUEUE object
+    print("Importing multiprocessing functions")
+    from multiprocessing import Process, Manager, Queue
+    SENSORQ = Queue()
+    #setup MIC object
+    MIC = Mic()
+    doTimer(ENVIRON, SENSORQ, MIC)

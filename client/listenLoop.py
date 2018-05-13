@@ -1,7 +1,7 @@
 """
 ===============================================================================================
 Sensor to listen for user input via Snowboy for hotword & activeListen for user command
-Copyright: Lee Matthews 2016
+Lee Matthews 2016
 Note that only one process at a time can use microphone. Need to ensure snowboy and active
 listen are stopped for brain and phone to use microphone. ENVIRON["listen"] manages this.
 
@@ -170,7 +170,8 @@ def doListen(ENVIRON, SENSORQ, MIC):
 
     
 
-
+# code to test this sensor independently
+#--------------------------------------------------------------------
 if __name__ == "__main__":
     print("Starting listenLoop from __main__ procedure")
     # Allow to manually run the sensor in isolation using the below
