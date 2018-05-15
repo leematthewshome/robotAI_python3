@@ -39,11 +39,12 @@ class serverSocket(object):
             self.URL = getConfig(config, "WebSocket_socketurl")
         
         #Set debug level based on details in config DB
-        if debugFlag=='TRUE':
-            self.logger = logging.getLogger('socketIO-client').setLevel(logging.DEBUG)
-        else:
-            self.logger = logging.getLogger('socketIO-client').setLevel(logging.INFO)
+        self.logger = logging.getLogger(__name__)
         logging.basicConfig()
+        if debugFlag=='TRUE':
+            self.logger.level = logging.DEBUG
+        else:
+            self.logger.level = logging.INFO
 
         
     # Connect to server and listen for messages. Socket.IO library will reconnect if conn lost
@@ -71,7 +72,7 @@ class serverSocket(object):
             whitelist = False
             
             #check the password is valid and the user type
-            
+            url = 'https://demo.easyrtc.com/demos/demo_multiparty.html'
             #this should be handled by the queue!!!!
             if whitelist:
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)
@@ -81,7 +82,7 @@ class serverSocket(object):
                 
         def on_conferKill(*args):
             self.logger.debug('Mesage to kill conference instance received.')
-            result=subprocess.Popen(['killall chromium-browser'], stdout=subprocess.PIPE)
+            result=subprocess.Popen(['killall', 'chromium-browse'], stdout=subprocess.PIPE)
             
             
         # Connect to the server 
@@ -94,7 +95,7 @@ class serverSocket(object):
         socketIO.on('reconnect', on_reconnect)
         socketIO.on('join_room', on_join_room)
         socketIO.on('conferGo', on_conferGo)
-        socketIO.on('conferKill', on_conferGo)
+        socketIO.on('conferKill', on_conferKill)
         socketIO.wait()
 
      
@@ -123,8 +124,8 @@ if __name__ == "__main__":
     #set up ENVIRON object
     ENVIRON = {}
     ENVIRON["topdir"] = "/home/pi/robotAI3"
-    ENVIRON["api_token"] = 'H1G2F3D4R5T6H7K8H9F0DSAOYTREDBHH'        
-    ENVIRON["api_login"] = 'lee.matthews.home'
+    ENVIRON["api_token"] = ''        
+    ENVIRON["api_login"] = ''
     ENVIRON["devicename"] = 'Whatever'
     #setup QUEUE object
     from multiprocessing import Process, Manager, Queue

@@ -214,8 +214,8 @@ def doTimer(ENVIRON, SENSORQ, MIC):
     loop.runLoop()
 
 
-    
-    # code to test this sensor independently
+'''
+# code to test this sensor independently
 #--------------------------------------------------------------------
 if __name__ == "__main__":
     # Allow to manually run the sensor in isolation using the below
@@ -230,8 +230,8 @@ if __name__ == "__main__":
     ENVIRON = {}
     ENVIRON["api_url"] = 'https://thisrobotai.com/api'
     ENVIRON["topdir"] = "/home/pi/robotAI3"
-    ENVIRON["api_token"] = 'H1G2F3D4R5T6H7K8H9F0DSAOYTREDBHH'        
-    ENVIRON["api_login"] = 'lee.matthews.home'
+    ENVIRON["api_token"] = ''        
+    ENVIRON["api_login"] = ''
     ENVIRON["listen"] = True        
     ENVIRON["timerCache"] = False
     #setup QUEUE object
@@ -241,3 +241,4 @@ if __name__ == "__main__":
     #setup MIC object
     MIC = Mic()
     doTimer(ENVIRON, SENSORQ, MIC)
+'''
