@@ -3,7 +3,8 @@
 Sensor to connect to the Robot AI website and listen for communications from the server
 Uses the Socket.io framework via https://pypi.org/project/socketIO-client/
 
-TODO - set logging based on config / 
+Note that only one process at a time can use microphone. If it is busy then the browser will not 
+open with access to the mic and camera.  ENVIRON["listen"] manages this.
 ===============================================================================================
 """
 import logging
@@ -72,9 +73,10 @@ class serverSocket(object):
             whitelist = False
             
             #check the password is valid and the user type
-            url = 'https://demo.easyrtc.com/demos/demo_multiparty.html'
+            
             #this should be handled by the queue!!!!
             if whitelist:
+                ENVIRON["listen"] = False
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)
             else:
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)
@@ -83,7 +85,7 @@ class serverSocket(object):
         def on_conferKill(*args):
             self.logger.debug('Mesage to kill conference instance received.')
             result=subprocess.Popen(['killall', 'chromium-browse'], stdout=subprocess.PIPE)
-            
+            ENVIRON["listen"] = True
             
         # Connect to the server 
         qstring = {'token': self.TOKEN, 'subscriber': self.SUBSCR, 'user': self.USRNAME}
