@@ -36,6 +36,17 @@ sudo pip3 install serial    #this fails...will impact robot operation
 
 sudo pip3 install pytz      #this fails...need to eliminate need for it in time.py
 
+# Instructions to install This Robot AI software
+
+Download the code from this site and unzip. Rename the resulting folder RobotAI3.
+
+Run the code by entering  "python3 robotAI3/robotAI.py" (assuming you renamed the directory robotAI3). While the software is running the configuration web pages will be accessible at http://localhost:5000 (or use the IP address of your device if accessing remotely).  
+
+The first time the code runs it will create a fresh configuration database for you. Edit the configuration using the URL above. You will need a subscription from https://thisrobotai.com to leverage any of the services provided through the website.
+
+
+
+
 
 
 
