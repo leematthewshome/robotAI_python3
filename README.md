@@ -1,35 +1,18 @@
 # robotAI_python3
 robotAI home automation and robotics platform. For more details reference the RobotAI website here https://thisrobotai.com/
 
-This is a work in progress. I am updating my own platform to make it Python3 compatible and to add more functionality.
-
-# Instructions to install into virtual environment - Raspbian Stretch used (Jessie seems to give problems)
-(bah!!! virtual environment wont seem to install pyaudio)
-
---If using python 3.4 install virtual env
-
-  sudo apt-get install python3.4-dev python3.4-venv
-
---create virtual environment named 'virtual' using python 3.4
-
-  mkdir robotAI3
-  
-  cd robotAI3
-  
-  python3.4 -m venv virtual
-
---whenever installing python modules into the virtual environment ensure you activate first
-
-source virtual/bin/activate
+This is a work in progress. 
 
 
 # Instructions to install necessary pre-requisites and libraries
+
+--Note that some of these libraries and applications might already be installed on your image. If so then no problem.
 
 --install required libraries for audio onto raspberry pi
 
 sudo apt-get install python3-pyaudio python-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
 
-pip install --allow-unverified=pyaudio pyaudio
+sudo pip3 install pyaudio
 
 --install text to speech software 
 
@@ -39,23 +22,20 @@ sudo apt-get install espeak flite libttspico0 libttspico-utils libttspico-data -
 
 sudo apt-get install mplayer -y
 
---install these python modules (activate virtual environment first if using)
+--install flask, which is required for local web pages to configure system
 
 sudo pip3 install flask
 
 --install pythion libraries leveraged by various modules
 
-sudo pip3 install pytz
-
 sudo pip3 install PyDictionary
 
-* note that some errors seem to result when installing falsk but these seem to be OK
+sudo pip3 install requests  #this fails...need to work out where used
 
-sudo pip3 install requests
+sudo pip3 install serial    #this fails...will impact robot operation
 
-sudo pip3 install serial
+sudo pip3 install pytz      #this fails...need to eliminate need for it in time.py
 
---This one gives an error   sudo pip3 install urllib2
 
 
 
