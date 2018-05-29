@@ -34,8 +34,6 @@ sudo pip3 install requests  #this fails...need to work out where used
 
 sudo pip3 install serial    #this fails...will impact robot operation
 
-sudo pip3 install pytz      #this fails...need to eliminate need for it in time.py
-
 # Instructions to install This Robot AI software
 
 Download the code from this site and unzip. Rename the resulting folder RobotAI3.
