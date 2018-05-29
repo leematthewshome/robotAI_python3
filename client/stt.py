@@ -35,7 +35,7 @@ class robotAI_stt():
         data = fp.read()
         speech_content_bytes = base64.b64encode(data)
         speech_content = speech_content_bytes.decode('utf-8')
-        print(speech_content)
+        #print(speech_content)
 
         jsonpkg = {'subscriberID': self.api_login,
                   'token': self.api_token,

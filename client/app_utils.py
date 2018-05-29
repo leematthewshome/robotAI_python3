@@ -114,15 +114,16 @@ def sendToRobotAPI(method, api_url, jsonpkg, mic, logger, ENVIRON=None):
             res = requests.put(api_url, data=json.dumps(jsonpkg), headers=headers, verify=True)
         else:
             res = requests.post(api_url, data=json.dumps(jsonpkg), headers=headers, verify=True)
+        status = res.status_code
     # handle where the request times out for some reason
     except requests.exceptions.Timeout:
-        mic.say('Hmmn. A timely response was not received from the robot A I website. Perhaps try again.')
+        status = -1
     # handle all other exceptions
     except:
-        mic.say('Sorry, there was a problem accessing the Robot A I website. Perhaps try again.')
+        status = -2
 
     # Check results returned by the API
-    if res.status_code == 200:
+    if status == 200:
         try:
             result = res.json()["result"]
             if result == "ERR":
@@ -146,6 +147,12 @@ def sendToRobotAPI(method, api_url, jsonpkg, mic, logger, ENVIRON=None):
         except:
             logger.critical('Could parse response from API.', exc_info=True)
             mic.say('Sorry. I was unable to read the response from the robot A I website.')
+    elif status == -1:
+        logger.critical('Could not access the API. The http request timed out.', exc_info=True)
+        mic.say('Hmmn. A timely response was not received from the robot A I website. Perhaps try again.')    
+    elif status == -2:
+        logger.critical('Could not access the API. The was an unhandled problem with the http request.', exc_info=True)
+        mic.say('Sorry, there was a problem accessing the Robot A I website. Perhaps try again.')    
     else:
         logger.critical('Could not access the API. Response was %s.' % res.status_code, exc_info=True)
         mic.say('Sorry. I was not able to access the robot A I website to perform the task.')
