@@ -76,7 +76,10 @@ class timerLoop(object):
                   }
 
         response = sendToRobotAPI('POST', api_url, jsonpkg, self.Mic, self.logger)
-        rows = response["events"]
+        try:
+            rows = response["events"]
+        except:
+            rows = None
         if not rows:
             self.logger.warning("No scheduled alerts or jobs found for today.")
             return True
