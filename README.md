@@ -30,9 +30,9 @@ sudo pip3 install flask
 
 sudo pip3 install PyDictionary
 
-sudo pip3 install requests  #this fails...need to work out where used
+sudo pip3 install requests  
 
-sudo pip3 install serial    #this fails...will impact robot operation
+sudo pip3 install pyserial    
 
 # Instructions to install This Robot AI software
 
