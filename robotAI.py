@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """
 ===============================================================================================
-Main code module for RobotAI. Updated for Pythin3
+Main code module for RobotAI. Updated for Python3
 Runs the various sensors, and feeds input to brain. 
 Also talks to the Arduino for robot control if connected.
 Author: Lee Matthews 2018
@@ -15,7 +15,7 @@ import logging
 import socket
 
 #import essential client modules
-from client.app_utils import getConfig, getConfigData, uzbl_goto
+from client.app_utils import getConfig, getConfigData, uzbl_goto, sendToRobotAPI
 from client import tts, stt, brain
 from client import mic
 
@@ -101,7 +101,7 @@ def stopRobot():
         uzbl_goto(face_url)
 
 
-# Check if we can access the internet
+# Function to check if we can access the internet
 def check_internet(server="www.google.com"):
     logger.debug("Checking network connection to server '%s'...", server)
     try:
@@ -115,6 +115,26 @@ def check_internet(server="www.google.com"):
     else:
         logger.debug("Internet connection working")
         return True
+
+        
+# Function to check if we can access This Robot AI APIs
+def check_robotAI(api_url, api_login, api_token, Mic, logger):
+    logger.debug("Checking access to This Robot AI APIs...")
+    #Try fetching a list as a test
+    api_url = os.path.join(api_url, 'list')
+    jsonpkg = {"subscriberID": api_login,
+              "token": api_token,
+              "listName": "WHATEVER",
+              "status": 0
+              }
+    response = sendToRobotAPI('GET', api_url, jsonpkg, Mic, logger, SPEAK=False)
+    result = "ERR"
+    try:
+        result = response["result"]
+    except:
+        pass
+    return result
+
 
 #Function to continuously check Queue and perform relevant actions
 #-----------------------------------------------------------------
@@ -173,9 +193,6 @@ if __name__ == '__main__':
             tries = tries - 1
             time.sleep(3)
 
-    # Need to check if a valid licence exists for the roboAT online APIs
-    #---------------------------------------------------------------------
-
     #set values shared across processes (fetch Listen config as we need it for stt_api)
     cfg_listen = getConfigData(TOPDIR, "Listen")
     mgr = Manager()
@@ -188,9 +205,9 @@ if __name__ == '__main__':
     ENVIRON["loglvl"] = logLevel                                            #store General config debug flag
     ENVIRON["stt_api"]   = getConfig(cfg_listen, "Listen_stt_api")          #speech to text API to use
     ENVIRON["version"]   = getConfig(cfg_general, "General_version")        #version of client code
+    ENVIRON["api_url"]   = getConfig(cfg_general, "General_api_url")        #API root entry point
     ENVIRON["api_token"] = getConfig(cfg_general, "General_api_token")      #token for access
     ENVIRON["api_login"] = getConfig(cfg_general, "General_api_login")      #subscriber login
-    ENVIRON["api_url"]   = getConfig(cfg_general, "General_api_url")        #API root entry point
     ENVIRON["devicename"]  = getConfig(cfg_general, "General_devicename")   #Identity of this device (eg. Doorbell, Home Assistant, etc.)
 
     #setup queue shared across functions
@@ -212,26 +229,24 @@ if __name__ == '__main__':
     # Brain is used to handle jobs that are taken from the SENSORQ
     BRAIN = brain.brain(MIC, ENVIRON)
 
-
-    # Say hello or let the user know if there were problems
+    # Check if a valid licence exists for the roboAT online APIs
     #---------------------------------------------------------------------
-    config = getConfigData(TOPDIR, "Listen")
-    robotName = getConfig(config, "Listen_hotword")
-    MIC.say("Hello. I am Your Robot A. I. ")
-    salutation = "One moment while I start my sensors."
-    if not isConfig or not isWWWeb:
-        salutation = salutation + "Please note, speech to text is disabled. So I cannot accept voice commands. "
-    if not isConfig:
-        salutation = salutation + "This is because I could not find a configuration file."
+    access = check_robotAI(ENVIRON["api_url"], ENVIRON["api_login"], ENVIRON["api_token"], MIC, logger)
+    
+    # Say hello and let the user know if there were problems
+    #---------------------------------------------------------------------
+    MIC.say("Hello. I am Your Robot A. I... One moment while I start my sensors.")
     if not isWWWeb:
-        salutation = salutation + " This is because I could not connect to the internet."
-    MIC.say(salutation)
-
+        MIC.say("Note that I could not connect to the internet. Any of my functions that rely on the internet will not work")
+    if access != "OK" and isWWWeb:
+        MIC.say("I am unable to access the Robot A. I. website. Perhaps you have not subscribed or have not entered your subscription details into my configuration.")
+        MIC.say("None of my functions that rely on the Robot A. I. website will work.")
+    
     
     # ---------------------------------------------------------------------------------------
     # Start web server to allow user to edit configuration
     # ---------------------------------------------------------------------------------------
-    MIC.say('Starting the web service.')
+    MIC.say('I am now starting the configuration web server.')
     logger.info("STARTING WEB SERVER")
     try:
         from webserver import webserver
@@ -244,7 +259,8 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------------------
     # kick off listen process if web exists and config = TRUE
     # ---------------------------------------------------------------------------------------
-    if isWWWeb and getConfig(cfg_listen, "Listen_1enable")=='TRUE':
+    robotName = getConfig(cfg_listen, "Listen_hotword")
+    if getConfig(cfg_listen, "Listen_1enable")=='TRUE':
         MIC.say('I am now starting my Listen sensor. Just say, %s, and I will listen for your command. ' % robotName)
         logger.info("STARTING THE LISTEN SENSOR")
         try:
@@ -260,16 +276,19 @@ if __name__ == '__main__':
     # kick off timer process based on enabled = TRUE
     # ---------------------------------------------------------------------------------------
     cfg_timer = getConfigData(TOPDIR, "Timer")
-    if getConfig(cfg_timer, "Timer_1enable")=='TRUE':
-        MIC.say('Starting my timer sensor, to process scheduled tasks and alerts.')
-        logger.info("STARTING THE TIMER SENSOR")
-        ENVIRON["timerCache"] = False   # flags whether the alert cache is up to date or not
-        try:
-            from client import timerLoop
-            t = Process(target=timerLoop.doTimer, args=(ENVIRON, SENSORQ, MIC, ))
-            t.start()
-        except:
-            MIC.say("There was an error starting the Timer sensor. No scheduled tasks or alarms will be possible.")
+    if isWWWeb and getConfig(cfg_timer, "Timer_1enable")=='TRUE':
+        if access != "OK":
+            MIC.say('I cannot start my timer sensor, as I am unable to access the Robot A. I. website.')
+        else:
+            MIC.say('Starting my timer sensor, to process scheduled tasks and alerts.')
+            logger.info("STARTING THE TIMER SENSOR")
+            ENVIRON["timerCache"] = False   # flags whether the alert cache is up to date or not
+            try:
+                from client import timerLoop
+                t = Process(target=timerLoop.doTimer, args=(ENVIRON, SENSORQ, MIC, ))
+                t.start()
+            except:
+                MIC.say("There was an error starting the Timer sensor. No scheduled tasks or alarms will be possible.")
     cfg_timer = None
     
     
@@ -277,15 +296,18 @@ if __name__ == '__main__':
     # kick off Robot AI webSocket listener based on enabled = TRUE
     # ---------------------------------------------------------------------------------------
     cfg_socket = getConfigData(TOPDIR, "WebSocket")
-    if getConfig(cfg_socket, "WebSocket_1enable")=='TRUE':
-        MIC.say('Connecting to the Robot A I server, for remote access and other functionality.')
-        logger.info("STARTING THE WEB SOCKET SENSOR")
-        try:
-            from client import serverSocket
-            s = Process(target=serverSocket.doSensor, args=(ENVIRON, SENSORQ, MIC, ))
-            s.start()
-        except:
-            MIC.say("There was an error connecting to the Robot A I server. ")
+    if isWWWeb and getConfig(cfg_socket, "WebSocket_1enable")=='TRUE':
+        if access != "OK":
+            MIC.say('I cannot open a web socket connection to the Robot A. I. server.')
+        else:
+            MIC.say('Opening a web socket connection to the Robot A. I. server, for remote access and other functionality.')
+            logger.info("STARTING THE WEB SOCKET SENSOR")
+            try:
+                from client import serverSocket
+                s = Process(target=serverSocket.doSensor, args=(ENVIRON, SENSORQ, MIC, ))
+                s.start()
+            except:
+                MIC.say("There was an error opening a web socket connection to the server. ")
     cfg_socket = None
 
     
