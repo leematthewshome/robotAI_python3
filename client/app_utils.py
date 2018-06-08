@@ -102,10 +102,11 @@ def getYesNo(mic, questn):
         return "NO"
 
 
-# Called by Weather.py TimerLoopHandle.py Knowledge.py 
 # Function to submit data to the robotAI website and receive results back
+# Called by Weather.py TimerLoop.py TimerLoopHandle.py Knowledge.py ChatBot.py
+# added SPEAK flag, so we can silently run this function when necessary. But really need to clean up this logic over time.
 # --------------------------------------------------------------------------
-def sendToRobotAPI(method, api_url, jsonpkg, mic, logger, ENVIRON=None):
+def sendToRobotAPI(method, api_url, jsonpkg, mic, logger, ENVIRON=None, SPEAK=True):
     headers = {'Content-Type': 'application/json'}
     try:
         if method == 'DELETE':
@@ -129,7 +130,8 @@ def sendToRobotAPI(method, api_url, jsonpkg, mic, logger, ENVIRON=None):
             if result == "ERR":
                 text = res.json()["errmsg"]
                 logger.debug('There was an error. The response was, ' + text, exc_info=True)
-                mic.say('Something went wrong. The robot A I responded with, ' + text)
+                if SPEAK:
+                    mic.say('Something went wrong. The robot A I responded with, ' + text)
             elif result == 'OK':
                 # Check the response for any messages from the server (eg. re subscription expiry)
                 #---------------------------------------------------------------------------------------------
@@ -143,16 +145,45 @@ def sendToRobotAPI(method, api_url, jsonpkg, mic, logger, ENVIRON=None):
                 #---------------------------------------------------------------------------------------------
                 return res.json()
             else:
-                mic.say('An unrecognised response was received from the robot A I website.')
+                # TODO Rather than mic.say we need to return error json to calling function
+                if SPEAK:
+                    mic.say('An unrecognised response was received from the robot A I website.')
         except:
             logger.critical('Could parse response from API.', exc_info=True)
-            mic.say('Sorry. I was unable to read the response from the robot A I website.')
+            # TODO Rather than mic.say we need to return error json to calling function
+            if SPEAK:
+                mic.say('Sorry. I was unable to read the response from the robot A I website.')
     elif status == -1:
         logger.critical('Could not access the API. The http request timed out.', exc_info=True)
-        mic.say('Hmmn. A timely response was not received from the robot A I website. Perhaps try again.')    
+        # TODO Rather than mic.say we need to return error json to calling function
+        if SPEAK:
+            mic.say('Hmmn. A timely response was not received from the robot A I website. Perhaps try again.')    
     elif status == -2:
         logger.critical('Could not access the API. The was an unhandled problem with the http request.', exc_info=True)
-        mic.say('Sorry, there was a problem accessing the Robot A I website. Perhaps try again.')    
+        # TODO Rather than mic.say we need to return error json to calling function
+        if SPEAK:
+            mic.say('Sorry, there was a problem accessing the Robot A I website. Perhaps try again.')    
     else:
         logger.critical('Could not access the API. Response was %s.' % res.status_code, exc_info=True)
-        mic.say('Sorry. I was not able to access the robot A I website to perform the task.')
+        # TODO Rather than mic.say we need to return error json to calling function
+        if SPEAK:
+            mic.say('Sorry. I was not able to access the robot A I website to perform the task.')
+
+        
+        
+# Function to test access to the robotAI APIs
+# --------------------------------------------------------------------------
+def testRobotAPI(ENVIRON, mic, logger):
+    # use the events endpoint for testing
+    from datetime import datetime
+    now = datetime.datetime.now()
+    day = now.strftime("%a")
+    dte = now.strftime("%Y") + now.strftime("%m") + now.strftime("%d")
+    api_url = os.path.join(ENVIRON["api_url"], 'event')
+    jsonpkg = {"subscriberID": ENVIRON["api_login"],
+              "token": ENVIRON["api_token"],
+              "day": day,
+              "dte": dte
+              }
+    response = sendToRobotAPI('POST', api_url, jsonpkg, mic, logger)
+    return response
