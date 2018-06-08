@@ -1,7 +1,6 @@
 # -*- coding: utf-8-*-
 import re
 import os
-from urllib2 import URLError
 import logging
 from client.app_utils import uzbl_goto, sendToRobotAPI
 """
@@ -11,7 +10,6 @@ Usage:  'Play Blues Radio'
         'Play classical Radio'
         'Stop the radio'
         'Turn Off the Radio'
-Copyright: Lee Matthews 2016
 ===============================================================================================
 """
 
