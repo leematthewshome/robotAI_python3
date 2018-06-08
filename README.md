@@ -40,7 +40,7 @@ Download the code from this site and unzip. Rename the resulting folder RobotAI3
 
 Run the code by entering  "python3 robotAI3/robotAI.py" (assuming you renamed the directory robotAI3). While the software is running the configuration web pages will be accessible at http://localhost:5000 (or use the IP address of your device if accessing remotely).  
 
-The first time the code runs it will create a fresh configuration database for you. Edit the configuration using the URL above. You will need a subscription from https://thisrobotai.com to leverage any of the services provided through the website.
+The first time the code runs it will create a fresh configuration database for you. Edit the configuration using the URL above. You will need a subscription from https://thisrobotai.com to leverage any of the services provided through the website. That will include Speech To Text (STT) capabilities so you can give commands to This Robot AI verbally. If you dont want to leverage the online APIs but still want to give verbal commands, then you will need to leverage your own STT setup. One option is to use your own Google account. Code for that is here: https://github.com/leematthewshome/robotAI_GoogleSTT 
 
 
 
