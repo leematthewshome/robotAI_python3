@@ -1,5 +1,5 @@
 # robotAI_python3
-robotAI home automation and robotics platform. For more details reference the RobotAI website here https://thisrobotai.com/
+Upgrade of This Robot AI home automation and robotics platform to Python3. For more details reference the RobotAI website here https://thisrobotai.com/
 
 This is a work in progress. 
 
