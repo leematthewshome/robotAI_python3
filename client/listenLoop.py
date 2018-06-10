@@ -181,6 +181,8 @@ if __name__ == "__main__":
 
         def activeListenToAllOptions(self):
             print("running activeListenToAllOptions")
+            return ['THIS', 'IS', 'A', 'TEST']
+            ENVIRON["listen"] = True
         
     snowboydecoder.play_audio_file()
     #set up ENVIRON object
