@@ -26,13 +26,17 @@ sudo apt-get install mplayer -y
 
 sudo pip3 install flask
 
+--install socketIO_client, which is required for socket connection to the server
+
+sudo pip3 install socketIO-client
+
 --install pythion libraries leveraged by various modules
 
 sudo pip3 install PyDictionary
 
 sudo pip3 install requests  
 
-sudo pip3 install pyserial    
+sudo pip3 install pyserial   
 
 # Instructions to install This Robot AI software
 
