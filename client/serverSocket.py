@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 ===============================================================================================
 Sensor to connect to the Robot AI website and listen for communications from the server
@@ -24,16 +25,14 @@ class serverSocket(object):
 
     def __init__(self, ENVIRON, SENSORQ, MIC):
         self.Mic = MIC
-        self.TOPDIR = ENVIRON["topdir"]
-        self.TOKEN = ENVIRON["api_token"]
-        self.SUBSCR = ENVIRON["api_login"]
-        self.USRNAME = ENVIRON["devicename"]
+        self.ENVIRON = ENVIRON
+        TOPDIR = ENVIRON["topdir"]
         
         #get the module configuration info
-        filename = os.path.join(self.TOPDIR, "static/sqlite/robotAI.sqlite")
-        config = getConfigData(self.TOPDIR, "WebSocket")
+        filename = os.path.join(TOPDIR, "static/sqlite/robotAI.sqlite")
+        config = getConfigData(TOPDIR, "WebSocket")
         if "ERROR" in config:
-            print("TimerLoop: Error getting Config: " + config["ERROR"])
+            print("serverSocket: Error getting Config: " + config["ERROR"])
             debugFlag = 'TRUE'
         else:
             debugFlag = getConfig(config, "WebSocket_2debug")
@@ -76,7 +75,7 @@ class serverSocket(object):
             
             #this should be handled by the queue!!!!
             if whitelist:
-                ENVIRON["listen"] = False
+                self.ENVIRON["listen"] = False
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)
             else:
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)
@@ -85,10 +84,15 @@ class serverSocket(object):
         def on_conferKill(*args):
             self.logger.debug('Mesage to kill conference instance received.')
             result=subprocess.Popen(['killall', 'chromium-browse'], stdout=subprocess.PIPE)
-            ENVIRON["listen"] = True
+            self.ENVIRON["listen"] = True
             
         # Connect to the server 
-        qstring = {'token': self.TOKEN, 'subscriber': self.SUBSCR, 'user': self.USRNAME}
+        TOKEN = self.ENVIRON["api_token"]
+        SUBSCR = self.ENVIRON["api_login"]
+        USRNAME = self.ENVIRON["devicename"]
+
+        qstring = {'token': TOKEN, 'subscriber': SUBSCR, 'user': USRNAME}
+        self.logger.debug('Attempting to connect with %s - %s - %s' % (TOKEN, SUBSCR, USRNAME))
         socketIO = SocketIO(self.URL, 443, params=qstring)
 
         # Set up custom listeners
@@ -102,7 +106,6 @@ class serverSocket(object):
 
      
 
-
  
 # ==========================================================================
 # Function called by main robotAI process to run this sensor
@@ -113,26 +116,17 @@ def doSensor(ENVIRON, SENSORQ, MIC):
 
 
 
-"""
+# **************************************************************************
+# This will only be executed when we run the sensor on its own for debugging
+# **************************************************************************
 if __name__ == "__main__":
-    print("Starting socketListener from __main__ procedure")
-    # Allow to manually run the sensor in isolation using the below
-    class Mic(object):
-        def say(self, text):
-            print(text)
-        def activeListenToAllOptions(self):
-            print("running activeListenToAllOptions")
-        
-    #set up ENVIRON object
-    ENVIRON = {}
-    ENVIRON["topdir"] = "/home/pi/robotAI3"
-    ENVIRON["api_token"] = ''        
-    ENVIRON["api_login"] = ''
-    ENVIRON["devicename"] = 'Whatever'
-    #setup QUEUE object
-    from multiprocessing import Process, Manager, Queue
+    print("******** WARNING ********** Starting socketListener from __main__ procedure")
+    from multiprocessing import Queue
     SENSORQ = Queue()
-    #setup MIC object
-    MIC = Mic()
+
+    import testSensor
+    ENVIRON = testSensor.createEnviron()
+    MIC = testSensor.createMic(ENVIRON, 'pico-tts')
+    
     doSensor(ENVIRON, SENSORQ, MIC)
-"""
+
