@@ -169,32 +169,16 @@ def doListen(ENVIRON, SENSORQ, MIC):
 
 
     
-
-# code to test this sensor independently
-#--------------------------------------------------------------------
+# **************************************************************************
+# This will only be executed when we run the sensor on its own for debugging
+# **************************************************************************
 if __name__ == "__main__":
-    print("Starting listenLoop from __main__ procedure")
-    # Allow to manually run the sensor in isolation using the below
-    class Mic(object):
-        def say(self, text):
-            print(text)
-
-        def activeListenToAllOptions(self):
-            print("running activeListenToAllOptions")
-            return ['THIS', 'IS', 'A', 'TEST']
-            ENVIRON["listen"] = True
-        
-    snowboydecoder.play_audio_file()
-    #set up ENVIRON object
-    ENVIRON = {}
-    ENVIRON["topdir"] = "/home/pi/robotAI3"
-    ENVIRON["listen"] = True        
-    #setup QUEUE object
-    print("Importing multiprocessing functions")
-    from multiprocessing import Process, Manager, Queue
+    print("******** WARNING ********** Starting socketListener from __main__ procedure")
+    from multiprocessing import Queue
     SENSORQ = Queue()
-    #setup MIC object
-    MIC = Mic()
-    print("calling doListen function")
+
+    import testSensor
+    ENVIRON = testSensor.createEnviron()
+    MIC = testSensor.createMic(ENVIRON, 'pico-tts')
     doListen(ENVIRON, SENSORQ, MIC)
 

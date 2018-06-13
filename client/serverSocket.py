@@ -11,6 +11,7 @@ open with access to the mic and camera.  ENVIRON["listen"] manages this.
 import logging
 import subprocess
 import os
+import time
 #allow for running listenloop either in isolation or via robotAI.py
 try:
     from client.app_utils import getConfigData, getConfig
@@ -74,8 +75,9 @@ class serverSocket(object):
             #check the password is valid and the user type
             
             #this should be handled by the queue!!!!
+            self.ENVIRON["listen"] = False
+            time.sleep(1)
             if whitelist:
-                self.ENVIRON["listen"] = False
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)
             else:
                 result=subprocess.Popen(["chromium-browser", "--use-fake-ui-for-media-stream", url], stdout=subprocess.PIPE)

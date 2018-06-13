@@ -55,7 +55,7 @@ class timerLoop(object):
         self.expiryCache = {}                   #list containing last run of expiry alerts
         self.curDate = datetime.date.today()    #used to compare to now() to determine if day has changed
 
-
+             
     # Function used to fetch alerts and jobs from cache
     #============================================================================================
     def initCache(self, filename=None):
@@ -74,13 +74,15 @@ class timerLoop(object):
                   "day": day,
                   "dte": dte
                   }
-
         response = sendToRobotAPI('POST', api_url, jsonpkg, self.Mic, self.logger)
         try:
             rows = response["events"]
         except:
             rows = None
-        if not rows:
+        if rows is None:
+            self.logger.warning("There was an error getting data from the RobotAI server.")
+            return True
+        elif len(rows)==0:
             self.logger.warning("No scheduled alerts or jobs found for today.")
             return True
         else:
@@ -217,31 +219,17 @@ def doTimer(ENVIRON, SENSORQ, MIC):
     loop.runLoop()
 
 
-'''
-# code to test this sensor independently
-#--------------------------------------------------------------------
+# **************************************************************************
+# This will only be executed when we run the sensor on its own for debugging
+# **************************************************************************
 if __name__ == "__main__":
-    # Allow to manually run the sensor in isolation using the below
-    class Mic(object):
-        def say(self, text):
-            print(text)
-
-        def activeListenToAllOptions(self):
-            print("running activeListenToAllOptions")
-
-    #set up ENVIRON object
-    ENVIRON = {}
-    ENVIRON["api_url"] = 'https://thisrobotai.com/api'
-    ENVIRON["topdir"] = "/home/pi/robotAI3"
-    ENVIRON["api_token"] = ''        
-    ENVIRON["api_login"] = ''
-    ENVIRON["listen"] = True        
-    ENVIRON["timerCache"] = False
-    #setup QUEUE object
-    print("Importing multiprocessing functions")
-    from multiprocessing import Process, Manager, Queue
+    print("******** WARNING ********** Starting socketListener from __main__ procedure")
+    from multiprocessing import Queue
     SENSORQ = Queue()
-    #setup MIC object
-    MIC = Mic()
+
+    import testSensor
+    ENVIRON = testSensor.createEnviron()
+    ENVIRON["timerCache"] = False
+    MIC = testSensor.createMic(ENVIRON, 'pico-tts')
+
     doTimer(ENVIRON, SENSORQ, MIC)
-'''
