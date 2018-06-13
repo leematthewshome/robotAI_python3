@@ -12,11 +12,14 @@ from contextlib import contextmanager
 #Lee AutoLevel - Import library for rms
 import audioop
 
-#allow for running listenloop either in isolation or via robotAI.py
+#allow for running from demo.py, listenloop.py or via robotAI.py
 try:
-    from client.snowboy import snowboydetect
+    try:
+        from client.snowboy import snowboydetect
+    except:
+        from snowboy import snowboydetect
 except:
-    from snowboy import snowboydetect
+    import snowboydetect
 
 logging.basicConfig()
 logger = logging.getLogger("snowboy")
@@ -105,7 +108,7 @@ class HotwordDetector(object):
                  audio_gain=1,
                  apply_frontend=False,
                  debugLevel=None,
-                 ENVIRON=None):
+                 ENVIRON={'listen':True}):
                  
         #Lee added logic around debug level
         if debugLevel:
@@ -227,8 +230,8 @@ class HotwordDetector(object):
         while self._running is True:
             #Lee added check to self.ENVIRON["listen"]
             #if interrupt_check():
-            if interrupt_check() or self.ENVIRON["listen"] == 'TRUE':
-                logger.debug("Detected interrupt flag. Exiting Snowboy loop.")
+            if interrupt_check() or self.ENVIRON["listen"] == False:
+                logger.debug("Snowboy detected interrupt or Listen=False. Exiting Snowboy loop.")
                 break
             data = self.ring_buffer.get()
             if len(data) == 0:
