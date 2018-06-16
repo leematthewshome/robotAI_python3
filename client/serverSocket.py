@@ -61,9 +61,6 @@ class serverSocket(object):
         def on_reconnect():
             self.logger.debug('You have reconnected')
 
-        def on_join_room(*args):
-            print('join_room', args)
-
         def on_conferGo(*args):
             self.logger.debug('Mesage to go to conference received.')
             #get the data that was passed in
@@ -101,7 +98,6 @@ class serverSocket(object):
         socketIO.on('connect', on_connect)
         socketIO.on('disconnect', on_disconnect)
         socketIO.on('reconnect', on_reconnect)
-        socketIO.on('join_room', on_join_room)
         socketIO.on('conferGo', on_conferGo)
         socketIO.on('conferKill', on_conferKill)
         socketIO.wait()
