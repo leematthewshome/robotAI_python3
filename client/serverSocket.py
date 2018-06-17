@@ -69,9 +69,9 @@ class serverSocket(object):
             user = args[0]['user']
             whitelist = False
             
-            #check the password is valid and the user type
+            #need to check the password is valid against the user record
             
-            #this should be handled by the queue!!!!
+            #cannot handle via job queue, as we need ENVIRON[listen] to stay off while cconfernece open
             self.ENVIRON["listen"] = False
             time.sleep(1)
             if whitelist:
