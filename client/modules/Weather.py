@@ -6,13 +6,10 @@ import logging
 import os
 from cgi import escape
 
-import webbrowser
-
 """
 ===============================================================================================
 Weather Module Utilising RobotAI API and website
 Usage: 'What is the weather for [Today|Tomorrow|Friday|etc]'
-Copyright: Lee Matthews 2016
 ===============================================================================================
 """
 
@@ -113,7 +110,7 @@ class Weather(object):
             'NW ': 'north west ',
             'NNW ': 'north north west ',
         }
-        for key, value in  words.iteritems():
+        for key, value in  words.items():
             text = text.replace(key, value)
         text = text.replace("F.", "degrees fahrenheit")
         text = text.replace("C.", "degrees celsius")
