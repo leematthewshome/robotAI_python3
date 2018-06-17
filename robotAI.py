@@ -57,7 +57,7 @@ if debugFlag == 'TRUE':
 else:
     logger.setLevel(level=logging.INFO)
     logLevel = logging.INFO
-    print("PAUSING FOR A MOMENT......THIS ALLOWS WIFI TO CONNECT")
+    print("PAUSING FOR A MOMENT......THIS ALLOWS WIFI TO CONNECT AFTER REBOOT")
     time.sleep(5)
 
 
@@ -163,7 +163,7 @@ def sensorLoop(MIC, BRAIN, ENVIRON):
             else:
                 MIC.say("Pardon?")
                 ENVIRON["listen"] = True
-        # Check if a message received from the server or a command inserted in ENVIRON
+        # Check if a message received from the server or a command inserted in ENVIRON via a module
         if ENVIRON.get("command"):
             msg = ENVIRON.pop('command', None)
             SENSORQ.put(['brain', msg.upper()]) 
