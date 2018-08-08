@@ -26,9 +26,13 @@ sudo apt-get install mplayer -y
 
 sudo pip3 install flask
 
---install socketIO_client, which is required for socket connection to the server
+--install socketIO_client, which is only required for the module that maintains a socket connection to the server
 
 sudo pip3 install socketIO-client
+
+--install open-cv (computer vision), which is only required for the motion sensor module
+
+sudo pip3 install opencv-python
 
 --install pythion libraries leveraged by various modules
 
