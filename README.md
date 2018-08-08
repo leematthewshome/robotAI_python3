@@ -34,6 +34,12 @@ sudo pip3 install socketIO-client
 
 sudo apt-get install libopencv-dev python-opencv
 
+sudo apt-get install libjasper-dev
+
+sudo apt-get install libqtgui4
+
+sudo apt install libqt4-test
+
 sudo pip3 install imutils
 
 --install pythion libraries leveraged by various modules
