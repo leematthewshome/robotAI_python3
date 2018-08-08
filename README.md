@@ -34,6 +34,8 @@ sudo pip3 install socketIO-client
 
 sudo pip3 install opencv-python
 
+sudo pip3 install imutils
+
 --install pythion libraries leveraged by various modules
 
 sudo pip3 install PyDictionary
