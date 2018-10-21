@@ -238,6 +238,44 @@ class webServer(object):
             return render_template('contacts.html', body=thisHTML, form=formHTML)
 
             
+        #function to save configuration
+        #-----------------------------------------------------
+        @self.websrvApp.route('/contacts_save.html', methods=['GET', 'POST'])
+        def contacts_save():
+            message = ""
+            filename = os.path.join(self.TOPDIR, "static/sqlite/robotAI.sqlite")
+            try:
+                con = sqlite3.connect(filename)
+                cur = con.cursor()
+            except:
+                return "Error. Could not connect to configuration database"
+                
+            #get values posted to form
+            first = request.form['first']   
+            last = request.form['last']   
+            mobile = request.form['mobile']   
+            soft = request.form['soft']   
+            email = request.form['email']   
+            white = request.form['white']   
+            delete = request.form['del']   
+
+            #first delete any record that already exists
+            SQL = "DELETE FROM Contacts WHERE FirstName = '%s' AND LastName='%s' " % (first, last)
+            cur.execute(SQL)
+            con.commit()
+            if delete == 'false':
+                SQL = "INSERT INTO Contacts(FirstName, LastName, Mobile, SoftPhone, Email, WhiteList) VALUES('%s', '%s', '%s', '%s', '%s', '%s') " % (first, last, mobile, soft, email, white)
+                cur.execute(SQL)
+                con.commit()           
+
+            #if no errors then set success message
+            if message=="":
+                message = "OK"
+            #close connection and return results
+            con.close()
+            return message
+
+    
         #send general HTML requests relevant template
         #-----------------------------------------------------
         @self.websrvApp.route('/', defaults={'path': ''})
