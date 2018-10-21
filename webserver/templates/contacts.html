@@ -29,11 +29,14 @@ function deleteItem(){
     //Get the form values necesary for a delete
     pFirst = $( "#frmFirstName" ).val();
     pLast = $( "#frmLastName" ).val();
-    pDel = 'true';
     $.post("contacts_save.html", 
         {
             first: pFirst,
             last: pLast,
+            mobile: "",
+            email: "",
+            soft: "",
+            white: "",
             del: "true"
         }, 
         function(result) {
@@ -44,6 +47,7 @@ function deleteItem(){
                 alert(result)
             }
     });
+//    alert('yyy')
 }
 
 //Function to save an event or update
@@ -70,7 +74,8 @@ function saveItem(){
             mobile: pMobile,
             email: pEmail,
             soft: pSoft,
-            white: pWhite
+            white: pWhite,
+            del: "false"
         }, 
         function(result) {
             if(result=='OK'){
