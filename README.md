@@ -32,13 +32,7 @@ sudo pip3 install socketIO-client
 
 --install open-cv (computer vision), which is only required for the motion sensor module
 
-sudo apt-get install libopencv-dev python-opencv
-
-sudo apt-get install libjasper-dev
-
-sudo apt-get install libqtgui4
-
-sudo apt install libqt4-test
+sudo pip3 install opencv-python
 
 sudo pip3 install imutils
 
