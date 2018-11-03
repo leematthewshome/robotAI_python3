@@ -2,8 +2,8 @@
 """
 ===============================================================================================
 Sensor for detecting motion using Open CV
-Copyright: Lee Matthews 2017
-Open computer vision (Open CV) libraries must be installed for this module
+Copyright: Lee Matthews 2018
+Open computer vision (Open CV) libraries required if use Camera for motion
 
 Motion sensing will only run if ENVIRON['motion'] == True. ENVIRON['security'] determines whether 
 motion raises an alarm or not. If not true then detected motion might only trigger a random event 
@@ -32,7 +32,7 @@ class motionLoop(object):
         if os.path.isfile(filename):
             config = getConfigData(self.TOPDIR, "Motion")
             if "ERROR" in config:
-                print ("MotionLoop: Error getting Config: " + config["ERROR"])
+                print "MotionLoop: Error getting Config: " + config["ERROR"]
                 debugFlag = 'TRUE'
             else:
                 debugFlag = getConfig(config, "Motion_2debug")
@@ -40,7 +40,6 @@ class motionLoop(object):
         #Set debug level based on details in config DB
         self.logger = logging.getLogger(__name__)
         logging.basicConfig()
-        debugFlag='TRUE'
         if debugFlag=='TRUE':
             self.logger.level = logging.DEBUG
         else:
@@ -153,8 +152,7 @@ class motionLoop(object):
 
             # dilate the thresholded image to fill in holes, then find contours on thresholded image
             thresh = cv2.dilate(thresh, None, iterations=2)
-            #(cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            image, cnts, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             # loop over the contours
             for c in cnts:
@@ -213,25 +211,9 @@ class motionLoop(object):
                     break
 
 
+
 # Function called by main robotAI procedure to start this sensor
 def runLoop(ENVIRON, SENSORQ, MIC):
     loop = motionLoop(ENVIRON, SENSORQ, MIC)
     loop.runLoop()
 
-
-    
-# **************************************************************************
-# This will only be executed when we run the sensor on its own for debugging
-# **************************************************************************
-if __name__ == "__main__":
-    print("******** WARNING ********** Starting socketListener from __main__ procedure")
-    from multiprocessing import Queue
-    SENSORQ = Queue()
-
-    import testSensor
-    ENVIRON = testSensor.createEnviron()
-    MIC = testSensor.createMic(ENVIRON, 'pico-tts')
-
-    ENVIRON["motion"] = True
-    ENVIRON["security"] = True
-    runLoop(ENVIRON, SENSORQ, MIC)
