@@ -20,10 +20,11 @@ import os
 import logging
 #allow for running listenloop either in isolation or via robotAI.py
 try:
-    from client import app_utils
+    from client.app_utils import getConfig, getConfigData
 except:
-    import app_utils
+    from app_utils import getConfig, getConfigData
 
+    
 class motionLoop(object):
 
     def __init__(self, ENVIRON, SENSORQ, MIC):
