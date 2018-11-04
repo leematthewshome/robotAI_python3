@@ -32,7 +32,7 @@ class motionLoop(object):
         if os.path.isfile(filename):
             config = getConfigData(self.TOPDIR, "Motion")
             if "ERROR" in config:
-                print "MotionLoop: Error getting Config: " + config["ERROR"]
+                print ("MotionLoop: Error getting Config: " + config["ERROR"])
                 debugFlag = 'TRUE'
             else:
                 debugFlag = getConfig(config, "Motion_2debug")
