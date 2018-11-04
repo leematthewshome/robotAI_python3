@@ -7,8 +7,10 @@ import base64
 import time
 
 #import essential client modules
-import client.app_utils
-
+try:
+    import client.app_utils
+except:
+    import app_utils
 
 
 # STT implementation using the robotAI community server API
