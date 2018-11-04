@@ -32,7 +32,7 @@ class motionLoop(object):
         if os.path.isfile(filename):
             config = getConfigData(self.TOPDIR, "Motion")
             if "ERROR" in config:
-                print ("MotionLoop: Error getting Config: " + config["ERROR"])
+                print "MotionLoop: Error getting Config: " + config["ERROR"]
                 debugFlag = 'TRUE'
             else:
                 debugFlag = getConfig(config, "Motion_2debug")
@@ -213,7 +213,21 @@ class motionLoop(object):
 
 
 # Function called by main robotAI procedure to start this sensor
-def runLoop(ENVIRON, SENSORQ, MIC):
+def doSensor(ENVIRON, SENSORQ, MIC):
     loop = motionLoop(ENVIRON, SENSORQ, MIC)
     loop.runLoop()
 
+
+# **************************************************************************
+# This will only be executed when we run the sensor on its own for debugging
+# **************************************************************************
+if __name__ == "__main__":
+    print("******** WARNING ********** Starting Sensor from __main__ procedure")
+    from multiprocessing import Queue
+    SENSORQ = Queue()
+
+    import testSensor
+    ENVIRON = testSensor.createEnviron()
+    MIC = testSensor.createMic(ENVIRON, 'pico-tts')
+    
+    doSensor(ENVIRON, SENSORQ, MIC)
