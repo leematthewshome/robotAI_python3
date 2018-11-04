@@ -296,7 +296,7 @@ if __name__ == '__main__':
     # kick off motion sensor process based on enabled = TRUE
     # ---------------------------------------------------------------------------------------
     cfg_motion = getConfigData(TOPDIR, "Motion")
-    if isWWWeb and getConfig(cfg_timer, "Motion_1enable")=='TRUE':
+    if getConfig(cfg_motion, "Motion_1enable")=='TRUE':
         MIC.say('Starting my motion sensor, to detect movement or body heat.')
         if access != "OK":
             MIC.say('I am unable to access the Robot A. I. website. Not all functionality may be available to my motion sensor.')
