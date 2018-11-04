@@ -17,9 +17,12 @@ import imutils
 import time
 import cv2
 import os
-from app_utils import getConfigData, getConfig
 import logging
-
+#allow for running listenloop either in isolation or via robotAI.py
+try:
+    from client import app_utils
+except:
+    import app_utils
 
 class motionLoop(object):
 
