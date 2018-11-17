@@ -4,13 +4,21 @@ import re
 import os
 from client.app_utils import getConfig, getConfigData, sendToRobotAPI
 import pickle
+
 """
 ===============================================================================================
 Module to handle Alert / Alarm / Reminder events raised by the TimerLoop Sensor
 Usage: Triggered by expiry of events in the calendar or system events
-Copyright: Lee Matthews 2017
+
+Author: Lee Matthews 2017
 ===============================================================================================
 """
+
+
+# Set priority to an average level
+# -----------------------------------------------------------------------------
+PRIORITY = 3
+
 
 
 #returns true if the stated command contains the right keywords

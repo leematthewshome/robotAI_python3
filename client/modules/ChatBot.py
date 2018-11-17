@@ -13,8 +13,9 @@ Copyright: Lee Matthews 2017
 ===============================================================================================
 """
 
-# Set priority. A higher value means a lower priority. 
-PRIORITY = 9
+# Set priority to an average level
+# -----------------------------------------------------------------------------
+PRIORITY = 1
 
 
 #default function to handle the request for this module

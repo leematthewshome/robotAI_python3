@@ -16,11 +16,11 @@ Usage: Triggered by motion detection events submitting entries to the Queue...al
   You Say "Turn motion detection On (or Off)"
   You say "Turn security camera On (or Off)"
 
-Copyright: Lee Matthews 2017
+Author: Lee Matthews 2017
 ===============================================================================================
 """
 
-# Set priority to average level
+# Set priority to high as it should come before 
 # -----------------------------------------------------------------------------
 PRIORITY = 3
 
@@ -29,11 +29,14 @@ PRIORITY = 3
 #-------------------------------------------------------------------------
 def handle(text, mic, ENVIRON):
     # note that motion will trigger the chatbot module if not in security cam mode 
-    if "SECURITYCAM" in text.upper():
+    if "SECURITYWARN" in text.upper() or "SECURITYVIDEO" in text.upper():
         logLevel = ENVIRON["loglvl"]
         logger = logging.getLogger(__name__)
         logger.level = logLevel
-        securityHandle(text, mic, ENVIRON, logger)
+        if "SECURITYWARN" in text.upper():
+            securityWarn(text, mic, ENVIRON, logger)
+        if "SECURITYVIDEO" in text.upper():
+            securityVideo(text, mic, ENVIRON, logger)
     elif "OFF" in text.upper() or "STOP" in text.upper():
         motionOff(text, mic, ENVIRON)
     elif "ON" in text.upper() or "START" in text.upper():
@@ -46,7 +49,7 @@ def handle(text, mic, ENVIRON):
 # returns true if the stated command contains the right keywords
 # -------------------------------------------------------------------------
 def isValid(text):
-    return bool(re.search(r'\bmotion|security|securitycam\b', text, re.IGNORECASE))
+    return bool(re.search(r'\bmotion|security|camera|securitywarn|securityvideo\b', text, re.IGNORECASE))
 
 
 # function to turn off the motion sensor (also turns off security mode)
@@ -62,15 +65,15 @@ def motionOff(text, mic, ENVIRON):
 def motionOn(text, mic, ENVIRON):
     ENVIRON["motion"] = True
     if "SECURITY" in text.upper():
-        mic.say("Turning on my security camera. I will alert you if I detect any motion.")
+        mic.say("Turning on my security system. I will alert you if I detect any motion.")
         ENVIRON["security"] = True
     else:
         mic.say("Turning on my motion sensor")
 
 
-# function to handle security camera events
+# function to handle motion sensor security alert (initial detection)
 #-------------------------------------------------------------------------
-def securityHandle(text, mic, ENVIRON, logger):
+def securityWarn(text, mic, ENVIRON, logger):
     # get variables required for sending the email
     TOPDIR = ENVIRON["topdir"]
     api_token = ENVIRON["api_token"]
@@ -85,7 +88,7 @@ def securityHandle(text, mic, ENVIRON, logger):
         return
     else:
         motion_email = config["Motion_notifyemail"]
-        securitychat = config["Motion_securitychat"]
+        #????????? need to also allow for SMS ??????????
     
     # build basic json package to submit
     jsonpkg = {"subscriberID": api_login,
@@ -94,32 +97,11 @@ def securityHandle(text, mic, ENVIRON, logger):
           "email": motion_email,
           "dtime": dtime
           }
-    images = {}
-          
-    # loop through array of files, serialise and build json document
-    imglist = []
-    for file in arr:
-        if '.jpg' in file:
-            #print ('serialising %s' % file)
-            fullpath = os.path.join(TOPDIR, "static/images/", file)
-            if os.path.isfile(fullpath):
-                with open(fullpath, "rb") as image_file:
-                    #data = image_file.read()
-                    data = base64.b64encode(image_file.read())
-                    img = {file: data}
-                    imglist.append(img)
-                    # remove file from disk
-                    os.remove(fullpath)
-    imgnode = {"files": imglist}
-    jsonpkg.update(imgnode)
-
-    # send json to robotAI API to email 
     api_url = os.path.join(api_url, 'email')
-    response = sendToRobotAPI('POST', api_url, jsonpkg, mic, logger, ENVIRON)                    
+    #response = sendToRobotAPI('POST', api_url, jsonpkg, mic, logger, ENVIRON)                    
     
-    # If a security warning is configured then run that via Chatbot
-    if len(securitychat) > 0:
-        from ChatBot import chatBot
-        bot = chatBot(text, mic, ENVIRON)
-        bot.doChat(securitychat)
-
+    
+# function to handle motion sensor video file being generated
+#-------------------------------------------------------------------------
+def securityVideo(text, mic, ENVIRON, logger):
+    print('????????? Need to at least add some debugging here ?????????')
