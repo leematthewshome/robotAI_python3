@@ -3,7 +3,7 @@
 ===============================================================================================
 Sensor for detecting motion using Open CV
 Copyright: Lee Matthews 2018
-Open computer vision (Open CV) libraries required if use Camera for motion
+Open computer vision (Open CV) libraries required 
 
 Motion sensing will only run if ENVIRON['motion'] == True. ENVIRON['security'] determines whether 
 motion raises an alarm or not. If not true then detected motion might only trigger a random event 
@@ -24,7 +24,7 @@ try:
 except:
     from app_utils import getConfig, getConfigData
 
-    
+
 class motionLoop(object):
 
     def __init__(self, ENVIRON, SENSORQ, MIC):
@@ -36,7 +36,7 @@ class motionLoop(object):
         if os.path.isfile(filename):
             config = getConfigData(self.TOPDIR, "Motion")
             if "ERROR" in config:
-                print "MotionLoop: Error getting Config: " + config["ERROR"]
+                print ("MotionLoop: Error getting Config: " + config["ERROR"])
                 debugFlag = 'TRUE'
             else:
                 debugFlag = getConfig(config, "Motion_2debug")
@@ -51,8 +51,10 @@ class motionLoop(object):
 
         # setup variables for motion detection process
         #-------------------------------------------------
+        # ??????????? Need to fetch the type of motion sensing to use here ???????????
         self.framesCheck = 10                           
         self.motionChat = getConfig(config, "Motion_motionchat")
+        self.securitychat = getConfig(config, "Motion_securitychat")
         self.min_area = int(getConfig(config, "Motion_minarea"))
         self.imagePath = os.path.join(self.TOPDIR, "static/images/")
         # try to get the integer values from config
@@ -77,10 +79,10 @@ class motionLoop(object):
         self.logger.debug("Path for saving images is %s" % self.imagePath)
         
         # delete jpg files from images directory when starting sensor
-        self.logger.debug("Deleting old files in %s" % self.imagePath)
-        filelist = [ f for f in os.listdir(self.imagePath) ]
-        for f in filelist:
-            os.remove(os.path.join(self.imagePath, f))
+        #self.logger.debug("Deleting old files in %s" % self.imagePath)
+        #filelist = [ f for f in os.listdir(self.imagePath) ]
+        #for f in filelist:
+        #    os.remove(os.path.join(self.imagePath, f))
 
 
     # Loop to keep checking every 5 seconds whether we should turn motion detection on
@@ -93,14 +95,83 @@ class motionLoop(object):
             if self.ENVIRON["motion"]:
                 # let the user know security mode is coming
                 if self.ENVIRON["security"]:
-                    self.Mic.say("Security camera will be enabled in ten seconds. Any detected motion will raise an alarm.")
-                    time.sleep(10)
+                    self.Mic.say("Security camera will be enabled in %s seconds. Any detected motion will raise an alarm." % str(self.delay))
                 # run the motion detection logic
+                #?????????? call relevant function depending on motion mode ??????????
+                #if self.motionMode = 'CAMERA':
                 self.detectMotion()
+                #else 
+                #self.detectHuman()
             else:
                 time.sleep(5)
 
+    # Steps to perform when Security Alert Triggered
+    # ============================================================================================
+    def securityWarn(self, camera):
+    
+        # function to save single image when motion detected
+        def snapshot(camera, num):
+            file = time.strftime("%y%m%d%H%M%S") + '-' + str(num) + '.jpg'
+            fullpath = self.imagePath + file
+            self.logger.debug("Saving image to %s" % fullpath)
+            (grabbed, frame) = camera.read()
+            cv2.imwrite(fullpath, frame)
+            time.sleep(0.5)
+            return file
+        
+        # function to save video when motion detected
+        def recordVideo(camera, sec):
+            file = time.strftime("%y%m%d%H%M%S") + '.avi'
+            fullpath = self.imagePath + file
+            fourcc = cv2.VideoWriter_fourcc(*'XVID')
+            out = cv2.VideoWriter(fullpath, fourcc, 20.0, (640,480)) 
+            start_time = time.time()
+            while( int(time.time() - start_time) < sec):
+                ret, frame = camera.read()
+                if ret==True:
+                    #frame = cv2.flip(frame, 0)
+                    out.write(frame)
+                    #cv2.imshow('frame',frame)
+                else:
+                    break
+            return file
 
+        #old code to take 3 snapshots
+        #f1 = snapshot(camera, 1)
+        #f2 = snapshot(camera, 2)
+        #f3 = snapshot(camera, 3)
+        #command = 'SECURITYCAM ,%s,%s,%s' % (f1, f2, f3)
+
+        file = recordVideo(camera, 5)
+        command = 'SECURITYWARN ,%s' % (file)
+        self.logger.debug("Posting %s to Queue" % command)
+        self.ENVIRON["listen"] = False
+        self.SENSORQ.put(['brain', command])
+
+        # trigger Chat while then record more video for reaction (if chat ID configured)
+        if len(self.securitychat) > 0:
+            command = 'CHATBOT:%s' % self.securitychat
+            self.logger.debug("Posting %s to Queue" % command)
+            self.ENVIRON["listen"] = False
+            self.SENSORQ.put(['brain', command])
+        
+        #record more video while chat is being executed
+        file = recordVideo(camera, 10)
+        command = 'SECURITYVIDEO ,%s' % (file)
+        self.logger.debug("Posting %s to Queue" % command)
+        self.ENVIRON["listen"] = False
+        self.SENSORQ.put(['brain', command])
+
+
+
+        
+    # Loop to actually detect motion using the camera
+    # ============================================================================================
+    def detectHuman(self):
+        self.logger.debug("Placeholder to detect human with PIR sensor")
+    
+
+    
     # Loop to actually detect motion using the camera
     # ============================================================================================
     def detectMotion(self):
@@ -114,16 +185,6 @@ class motionLoop(object):
         firstFrame = None
         lastAlert = datetime.datetime.today()
         frames = 0
-
-        # function to save image when motion detected
-        def snapshot(camera, num):
-            file = time.strftime("%y%m%d%H%M%S") + '-' + str(num) + '.jpg'
-            fullpath = self.imagePath + file
-            self.logger.debug("Saving image to %s" % fullpath)
-            (grabbed, frame) = camera.read()
-            cv2.imwrite(fullpath, frame)
-            time.sleep(0.5)
-            return file
         
         # loop over the frames of the video feed and detect motion
         while True:
@@ -178,14 +239,12 @@ class motionLoop(object):
                     if self.ENVIRON["listen"] == True:
                         command = None
                         
-                        # if in security camera mode then take pictures
+                        # if in security camera mode then take pictures (now edited to capture video)
                         #----------------------------------------------
                         if self.ENVIRON["security"] == True:
-                            f1 = snapshot(camera, 1)
-                            f2 = snapshot(camera, 2)
-                            f3 = snapshot(camera, 3)
-                            command = 'SECURITYCAM ,%s,%s,%s' % (f1, f2, f3)
-                        # else check whether we sould begin a chat loop
+                            self.logger.debug("Security mode is enabled so trigger security alert")
+                            self.securityWarn(camera)
+                        # else check whether we should begin a chat loop
                         #----------------------------------------------
                         else:
                             self.logger.debug("Checking if we should trigger a chat")
@@ -196,12 +255,9 @@ class motionLoop(object):
                             if diff > datetime.timedelta(minutes=self.chatDelay):
                                 self.lastChat = curDTime
                                 command = 'CHATBOT:%s' % self.motionChat
-
-                        # post the command to the queue if we have one
-                        if command:
-                            self.ENVIRON["listen"] = False
-                            self.logger.debug("Posting %s to Queue" % command)
-                            self.SENSORQ.put(['brain', command])
+                                self.ENVIRON["listen"] = False
+                                self.logger.debug("Posting %s to Queue" % command)
+                                self.SENSORQ.put(['brain', command])
 
             # check the ENVIRON when frame count reaches check point
             #-------------------------------------------------------
@@ -235,3 +291,4 @@ if __name__ == "__main__":
     MIC = testSensor.createMic(ENVIRON, 'pico-tts')
     
     doSensor(ENVIRON, SENSORQ, MIC)
+
