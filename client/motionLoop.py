@@ -98,9 +98,9 @@ class motionLoop(object):
                 if self.ENVIRON["security"]:
                     self.Mic.say("Security camera will be enabled in %s seconds. Any detected motion will raise an alarm." % str(self.delay))
                 # run the motion detection logic based on detector chosen
-                if self.detector = 'Camera':
+                if self.detector == 'Camera':
                     self.detectMotion()
-                else 
+                else:
                     self.detectHuman()
             else:
                 time.sleep(5)
