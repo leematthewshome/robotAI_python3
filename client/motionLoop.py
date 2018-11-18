@@ -52,6 +52,7 @@ class motionLoop(object):
         # setup variables for motion detection process
         #-------------------------------------------------
         self.detector = getConfig(config, "Motion_detector")
+        self.detectPin = getConfig(config, "Motion_detectPin")
         self.framesCheck = 10                           
         self.motionChat = getConfig(config, "Motion_motionchat")
         self.securitychat = getConfig(config, "Motion_securitychat")
@@ -165,7 +166,44 @@ class motionLoop(object):
     # Loop to actually detect motion using the camera
     # ============================================================================================
     def detectHuman(self):
-        self.logger.debug("Placeholder to detect human with PIR sensor")
+        self.logger.debug("Using PIR sensor on pin %s to detect motion" % self.PIRPin)
+        import RPi.GPIO as GPIO
+        import time
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.detectPin, GPIO.IN, GPIO.PUD_UP)
+        camera = cv2.VideoCapture(0)
+        while True:
+            if GPIO.input(pirPin) == GPIO.LOW:
+                print ("No Motion")
+            else:
+                curDTime = datetime.datetime.today()
+                self.logger.debug("Motion detected at %s " % curDTime)
+                diff = curDTime - lastAlert
+                if (diff.seconds) < self.delay:
+                    self.logger.debug("Motion delay of %s seconds has not expired" % curDTime)                
+                else:
+                    lastAlert = curDTime
+                    self.logger.debug("Motion detected at %s and motion delay has expired" % curDTime)
+                    # Need to make sure that listen loop does not clash with motion alert
+                    if self.ENVIRON["listen"] == True:
+                        command = None
+                        # if in security camera mode then fire the alarm
+                        if self.ENVIRON["security"] == True:
+                            self.logger.debug("Security mode is enabled so trigger security alert")
+                            self.securityWarn(camera)
+                        # else check whether we should begin a chat loop
+                        else:
+                            self.logger.debug("Checking if we should trigger a chat")
+                            diff = 0
+                            # only trigger a chat if we have a delay and a chat ID
+                            if self.chatDelay > 0 and len(self.motionChat) > 0:
+                                diff = curDTime - self.lastChat
+                            if diff > datetime.timedelta(minutes=self.chatDelay):
+                                self.lastChat = curDTime
+                                command = 'CHATBOT:%s' % self.motionChat
+                                self.ENVIRON["listen"] = False
+                                self.logger.debug("Posting %s to Queue" % command)
+                                self.SENSORQ.put(['brain', command])
     
 
     
@@ -173,11 +211,9 @@ class motionLoop(object):
     # ============================================================================================
     def detectMotion(self):
         self.logger.debug("Starting to detect Motion")
-
         # define feed from camera
         camera = cv2.VideoCapture(0)
         time.sleep(1)
-
         # initialize variables used by the motion sensing
         firstFrame = None
         lastAlert = datetime.datetime.today()
