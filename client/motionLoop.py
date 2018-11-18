@@ -2,7 +2,7 @@
 """
 ===============================================================================================
 Sensor for detecting motion using Open CV
-Copyright: Lee Matthews 2018
+Author: Lee Matthews 2018
 Open computer vision (Open CV) libraries required 
 
 Motion sensing will only run if ENVIRON['motion'] == True. ENVIRON['security'] determines whether 
