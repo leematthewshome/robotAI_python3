@@ -51,7 +51,7 @@ class motionLoop(object):
 
         # setup variables for motion detection process
         #-------------------------------------------------
-        # ??????????? Need to fetch the type of motion sensing to use here ???????????
+        self.detector = getConfig(config, "Motion_detector")
         self.framesCheck = 10                           
         self.motionChat = getConfig(config, "Motion_motionchat")
         self.securitychat = getConfig(config, "Motion_securitychat")
@@ -96,12 +96,11 @@ class motionLoop(object):
                 # let the user know security mode is coming
                 if self.ENVIRON["security"]:
                     self.Mic.say("Security camera will be enabled in %s seconds. Any detected motion will raise an alarm." % str(self.delay))
-                # run the motion detection logic
-                #?????????? call relevant function depending on motion mode ??????????
-                #if self.motionMode = 'CAMERA':
-                self.detectMotion()
-                #else 
-                #self.detectHuman()
+                # run the motion detection logic based on detector chosen
+                if self.detector = 'Camera':
+                    self.detectMotion()
+                else 
+                    self.detectHuman()
             else:
                 time.sleep(5)
 
@@ -161,8 +160,6 @@ class motionLoop(object):
         self.logger.debug("Posting %s to Queue" % command)
         self.ENVIRON["listen"] = False
         self.SENSORQ.put(['brain', command])
-
-
 
         
     # Loop to actually detect motion using the camera
