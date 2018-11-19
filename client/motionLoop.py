@@ -16,11 +16,12 @@ import time
 import cv2
 import os
 import logging
+import json
 #allow for running listenloop either in isolation or via robotAI.py
 try:
-    from client.app_utils import getConfig, getConfigData
+    from client.app_utils import getConfig, getConfigData, sendToRobotAPI
 except:
-    from app_utils import getConfig, getConfigData
+    from app_utils import getConfig, getConfigData, sendToRobotAPI
 
 
 class motionLoop(object):
@@ -67,6 +68,13 @@ class motionLoop(object):
             self.delay = 10
             self.min_area = 500
             self.detectPin = 0
+            
+        # variables required to pre-fetch the security chat JSON
+        self.api_token = ENVIRON["api_token"]
+        self.api_login = ENVIRON["api_login"]
+        self.api_url = ENVIRON["api_url"]
+        self.chatfile = os.path.join(self.TOPDIR, "static/securityChat.json")
+
         # set lastChat so it triggers a chat if motion detected after startup
         self.lastChat = datetime.datetime.today() - datetime.timedelta(minutes=self.chatDelay)
         # set non to blank as we handle that below using len(self.motionChat)
@@ -85,11 +93,35 @@ class motionLoop(object):
         #    os.remove(os.path.join(self.imagePath, f))
 
 
+        
+    # Get security chat json and save as file. This speeds up response for security alert
+    #============================================================================================
+    def createFile(self):
+        chatid = self.securitychat
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # temporary fix for 2 part chat IDs (until API fixed)
+        arr = chatid.split('-')
+        if len(arr) == 2:
+            chatid = '0-' + chatid
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        if len(self.securitychat) > 0:
+            jsonpkg = {'subscriberID': self.api_login,
+                       'token': self.api_token,
+                       'chatid' : chatid,
+                       }
+            api_url = os.path.join(self.api_url, 'chat')
+            response = sendToRobotAPI('GET', api_url, jsonpkg, self.Mic, self.logger, self.ENVIRON)
+            with open(self.chatfile, 'w') as outfile:
+                json.dump(response, outfile)
+
+
+
     # Loop to keep checking every 5 seconds whether we should turn motion detection on
     #============================================================================================
     def runLoop(self):
         self.logger.debug("Starting Motion Sensor Loop")
-        # only take note of movement if we are in security mode
+        # pre-fetch the security chat text 
+        self.createFile()
         while True:
             self.logger.debug("ENVIRON for Motion and Security : %s and %s" % (self.ENVIRON["motion"], self.ENVIRON["security"]))
             if self.ENVIRON["motion"]:
@@ -104,6 +136,7 @@ class motionLoop(object):
             else:
                 time.sleep(5)
 
+                
                 
     # Steps to perform when Security Alert Triggered
     # ============================================================================================
@@ -142,15 +175,15 @@ class motionLoop(object):
         #f3 = snapshot(camera, 3)
         #command = 'SECURITYCAM ,%s,%s,%s' % (f1, f2, f3)
 
-        file = recordVideo(camera, 5)
+        file = recordVideo(camera, 3)
         command = 'SECURITYWARN ,%s' % (file)
         self.logger.debug("Posting %s to Queue" % command)
         self.ENVIRON["listen"] = False
         self.SENSORQ.put(['brain', command])
 
-        # trigger Chat while then record more video for reaction (if chat ID configured)
+        # trigger Chat then record more video for reaction (if chat ID configured)
         if len(self.securitychat) > 0:
-            command = 'CHATBOT:%s' % self.securitychat
+            command = 'CHATFILE:%s:%s' % (self.chatfile, self.securitychat)
             self.logger.debug("Posting %s to Queue" % command)
             self.ENVIRON["listen"] = False
             self.SENSORQ.put(['brain', command])
@@ -161,6 +194,7 @@ class motionLoop(object):
         self.logger.debug("Posting %s to Queue" % command)
         self.ENVIRON["listen"] = False
         self.SENSORQ.put(['brain', command])
+
 
         
     # Work out what we need to do when motion detected
@@ -198,7 +232,10 @@ class motionLoop(object):
                         self.ENVIRON["listen"] = False
                         self.logger.debug("Posting %s to Queue" % command)
                         self.SENSORQ.put(['brain', command])
+        # pre-fetch the security chat text to regenerate file
+        self.createFile()
         return lastAlert
+
         
         
     # Loop to detect motion using the PIR Sensor
@@ -217,9 +254,7 @@ class motionLoop(object):
             if GPIO.input(self.detectPin) == GPIO.LOW:
                 self.logger.debug("No motion detected yet.")
             else:
-                print ("Last Alert BEFORE detection event is %s" % lastAlert)
                 lastAlert = self.detectionEvent(lastAlert, camera)
-                print ("Last Alert AFTER detection event is %s" % lastAlert)
 
             frames += 1
             # check the ENVIRON when frame count reaches check point
@@ -235,6 +270,7 @@ class motionLoop(object):
             #pause before next loop
             time.sleep(0.3)
 
+            
             
     # Loop to detect motion using the camera
     # ============================================================================================
@@ -299,12 +335,15 @@ class motionLoop(object):
 
 
 
+#---------------------------------------------------------------------------
 # Function called by main robotAI procedure to start this sensor
+#---------------------------------------------------------------------------
 def doSensor(ENVIRON, SENSORQ, MIC):
     loop = motionLoop(ENVIRON, SENSORQ, MIC)
     loop.runLoop()
 
 
+    
 # **************************************************************************
 # This will only be executed when we run the sensor on its own for debugging
 # **************************************************************************
