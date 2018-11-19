@@ -8,8 +8,11 @@ from client.app_utils import uzbl_goto, getYesNo, sendToRobotAPI
 """
 ===============================================================================================
 "Chatty Robot" Module For interactive conversation, jokes, and other purposes
-Usage: Called by various modules (joke, introduce, etc) as well as triggered via sensors
-Copyright: Lee Matthews 2017
+Usage: Called by various modules (joke, MotionLoop, etc) as well as triggered via sensors
+  - Trigger via CHATBOT and the text will be fetched from online database
+  - Trigger via CHATFILE and the text will be fetched from the file location instead
+  
+Author: Lee Matthews 2017
 ===============================================================================================
 """
 
@@ -20,18 +23,24 @@ PRIORITY = 1
 
 #default function to handle the request for this module
 def handle(text, mic, ENVIRON):
+    bot = chatBot(text, mic, ENVIRON)
     chatid = ''
-    # check if a chat ID was posted by motionLoop (or other module)
+    # get the chat ID or filepath that was sent 
     if ':' in text:
         arr = text.split(":")
         chatid = arr[1]
-    bot = chatBot(text, mic, ENVIRON)
-    bot.doChat(chatid)
+    # call the relevant process based on the trigger word
+    if 'CHATFILE' in text.upper():
+        bot.doFile(chatid)
+    else:
+        bot.doChat(chatid)
+
 
 
 #returns true if the stated command contains the right keywords
 def isValid(text):
-    return bool(re.search(r'\bchatbot\b', text, re.IGNORECASE))
+    return bool(re.search(r'\bchatbot|chatfile\b', text, re.IGNORECASE))
+
 
 
 # class for creating the interactive chat bot
@@ -49,6 +58,29 @@ class chatBot(object):
         self.api_url = ENVIRON["api_url"]
         self.logger = logging.getLogger(__name__)
         self.logger.level = ENVIRON["loglvl"]
+
+
+    # fetch the chat sequence and then loop through results
+    # ------------------------------------------------------
+    def doFile(self, filePath):
+        import json
+        #test filePath is valid
+        if not os.path.isfile(filePath):
+            self.Mic.say('Uh Oh. I was supposed to say something, but cannot find the file.')
+            return
+        #open the file and get chat list from JSON document
+        try:
+            with open(filePath) as json_file:  
+                response = json.load(json_file)
+                self.logger.debug(response)
+                rows = response["list"]
+        except:
+            self.logger.warning("Failed to load JSON file for CHATFILE process")
+            return
+        #loop through and call doChatItem for each 
+        for row in rows:
+            resp = self.doChatItem(row['text'], row['funct'])
+
 
 
     # fetch the chat sequence and then loop through results

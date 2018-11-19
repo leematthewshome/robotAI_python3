@@ -11,7 +11,9 @@ import base64
 """
 ===============================================================================================
 Module to handle motion detection events raised by the MotionLoop Sensor. Also used to turn
-motion detection on or off by voice command.
+motion detection on or off by voice command. Note that actual filming is handled by the sensor
+itself.
+
 Usage: Triggered by motion detection events submitting entries to the Queue...also:
   You Say "Turn motion detection On (or Off)"
   You say "Turn security camera On (or Off)"
