@@ -6,12 +6,6 @@ import requests
 import base64
 import time
 
-#import essential client modules
-try:
-    import client.app_utils
-except:
-    import app_utils
-
 
 # STT implementation using the robotAI community server API
 #---------------------------------------------------------------------
@@ -58,6 +52,7 @@ class robotAI_stt():
                 except:
                     self.logger.critical('Could not parse response from API.', exc_info=True)
                     transcribed.append('APIERROR1')
+                    print(r.content)
             else:
                 self.logger.critical('Request failed with response: %r', r.text, exc_info=True)
                 transcribed.append('APIERROR2')
