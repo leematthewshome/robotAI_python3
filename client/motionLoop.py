@@ -50,16 +50,15 @@ class motionLoop(object):
 
         # setup variables for motion detection process
         #-------------------------------------------------
-        self.detector = getConfig(config, "Motion_detector")
+        self.detector = getConfig(config, "Motion_detectMethod")
         self.framesCheck = 10                           
-        self.motionChat = getConfig(config, "Motion_motionchat")
-        self.securitychat = getConfig(config, "Motion_securitychat")
-        self.min_area = int(getConfig(config, "Motion_minarea"))
+        self.motionChat = getConfig(config, "Motion_motionChat")
+        self.securitychat = getConfig(config, "Motion_securityChat")
         self.imagePath = os.path.join(self.TOPDIR, "static/images/")
         # try to get the integer values from config
         try:
-            self.chatDelay = int(getConfig(config, "Motion_chatdelay"))
-            self.delay = int(getConfig(config, "Motion_detectdelay"))
+            self.chatDelay = int(getConfig(config, "Motion_waitChat"))
+            self.delay = int(getConfig(config, "Motion_waitDetect"))
             self.min_area = int(getConfig(config, "Motion_minarea"))
             self.detectPin = int(getConfig(config, "Motion_detectPin"))
         except:
