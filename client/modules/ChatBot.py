@@ -1,6 +1,7 @@
 # -*- coding: utf-8-*-
 import re
 import os
+import time
 import datetime
 import logging
 from client.app_utils import uzbl_goto, getYesNo, sendToRobotAPI
@@ -110,7 +111,6 @@ class chatBot(object):
             # loop through each item in the chat text returned
             for row in rows:
                 resp = self.doChatItem(row['text'], row['funct'])
-                #print 'RESPONSE = %s' % resp
                 # if we need to select a path then loop through all options and search for response
                 nText = row['next']
                 if '|' in nText:
@@ -127,8 +127,15 @@ class chatBot(object):
     def doChatItem(self, text, funct):
         self.logger.debug("running doChatItem for function %s and text '%s'" % (funct, text))
         resp = ''
-        text = self.enrichText(text)
-        self.Mic.say(text)
+        # if the text is "wait(xx)" where xx is an integer then wait for that time (in seconds)
+        if re.search(r'^wait\([0-9]+\)$', text) is not None:
+            text = text.upper()
+            text = text.replace('WAIT(', '').replace(')', '')
+            num = int(text)
+            time.sleep(num)
+        else:
+            text = self.enrichText(text)
+            self.Mic.say(text)
         # if there is a function mentioned run it and get the results
         if funct:
             funct = funct.strip()
@@ -178,4 +185,3 @@ class chatBot(object):
     def pauseListen(self, sendstt):
         text = self.Mic.activeListenToAllOptions(SEND=sendstt)
         return text
-
