@@ -1,6 +1,8 @@
+#!/usr/bin/env python
 """
 ===============================================================================================
 Sensor for timed functions and operations, such as alerts and reminders
+Author: Lee Matthews 2016
 Relies on online APIs at ThisRobotAI.com 
 
 TODO - Nothing atm
@@ -14,10 +16,12 @@ import datetime
 import time
 #allow for running listenloop either in isolation or via robotAI.py
 try:
-    from client.app_utils import sendToRobotAPI, getConfigData, getConfig
+    from client.app_utils import getConfig, getConfigData, sendToRobotAPI, busyOn
 except:
-    from app_utils import sendToRobotAPI, getConfigData, getConfig
+    from app_utils import getConfig, getConfigData, sendToRobotAPI, busyOn
 import pickle
+
+
 
 class timerLoop(object):
 
@@ -197,8 +201,8 @@ class timerLoop(object):
     #Function executed when an event needs to be processed. if handle <> 1 then just expire it
     #============================================================================================
     def handleAlert(self, alertID, handle=1):
-        # flag that we are now busy with a process so passive listen must stop
-        self.ENVIRON["listen"] = False
+        # set system to indicate things are busy
+        busyOn(self.ENVIRON, self.logger)
         if handle == 1:
             sText = 'TIMER ALERT:' + str(alertID)
         else:
