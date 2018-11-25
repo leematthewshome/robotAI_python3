@@ -187,3 +187,29 @@ def testRobotAPI(ENVIRON, mic, logger):
               }
     response = sendToRobotAPI('POST', api_url, jsonpkg, mic, logger)
     return response
+    
+    
+# Function to check if cam / mic / robot is busy
+# --------------------------------------------------------------------------
+def busyCheck(ENVIRON, logger):
+    # ability to listen is a proxy for busy overall
+    if ENVIRON["listen"] == True:
+        return False 
+    else:
+        return True
+
+        
+# Function to flag that cam / mic / robot is busy
+# --------------------------------------------------------------------------
+def busyOn(ENVIRON, logger):
+    # ability to listen is a proxy for busy overall 
+    ENVIRON["listen"] = False
+
+
+# Function to flag that cam / mic / robot is NOT busy
+# --------------------------------------------------------------------------
+def busyOff(ENVIRON, logger):
+    # ability to listen is a proxy for busy overall 
+    ENVIRON["listen"] = True
+
+
