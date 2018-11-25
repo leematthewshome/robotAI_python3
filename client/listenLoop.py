@@ -1,7 +1,8 @@
+#!/usr/bin/env python
 """
 ===============================================================================================
 Sensor to listen for user input via Snowboy for hotword & activeListen for user command
-Lee Matthews 2016
+Author: Lee Matthews 2016
 Note that only one process at a time can use microphone. Need to ensure snowboy and active
 listen are stopped for brain and phone to use microphone. ENVIRON["listen"] manages this.
 
@@ -14,10 +15,10 @@ import os
 import time
 #allow for running listenloop either in isolation or via robotAI.py
 try:
-    from client import app_utils
+    from client.app_utils import getConfig, getConfigData, busyOn, busyOff, busyCheck
     from client.snowboy import snowboydecoder
 except:
-    import app_utils
+    from app_utils import getConfig, getConfigData, busyOn, busyOff, busyCheck
     from snowboy import snowboydecoder
 
 
@@ -35,13 +36,13 @@ class listenLoop(object):
         filename = os.path.join(self.TOPDIR, "static/sqlite/robotAI.sqlite")
         #get the module configuration info
         if os.path.isfile(filename):
-            config = app_utils.getConfigData(self.TOPDIR, "Listen")
+            config = getConfigData(self.TOPDIR, "Listen")
             if "ERROR" in config:
                 print("ListenLoop: Error getting Config: " + config["ERROR"])
             else:
-                debugFlag = app_utils.getConfig(config, "Listen_2debug")
-                self.hotword = app_utils.getConfig(config, "Listen_hotword")
-                self.sense_desc = app_utils.getConfig(config, "Listen_sensitivity")
+                debugFlag = getConfig(config, "Listen_2debug")
+                self.hotword = getConfig(config, "Listen_hotword")
+                self.sense_desc = getConfig(config, "Listen_sensitivity")
                 self.sensitivty = getSensitivity(self.sense_desc)
         #Set debug level based on details in config DB
         self.logger = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ class listenLoop(object):
 
     #Snowboy interrupt callback function
     def interrupt_callback(self):
-        if not self.ENVIRON["listen"]:
+        if busyCheck(self.ENVIRON, self.logger) == True:
             self.interrupted = True
         return self.interrupted
 
@@ -74,11 +75,11 @@ class listenLoop(object):
         #Lee AutoLevel - display the current average noise level
         self.logger.debug("Current avg_noise is %s" % self.ENVIRON["avg_noise"] )
 
-        if(not self.ENVIRON["listen"]):
-            self.logger.debug("KEYWORD DETECTED. But ENVIRON listen is False so we ignore it")
+        if busyCheck(self.ENVIRON, self.logger) == True:
+            self.logger.debug("KEYWORD DETECTED. But we are busy so ignore it")
         else:
-            #flag that we are now busy with a process
-            self.ENVIRON["listen"] = False
+            # set system to indicate things are busy
+            busyOn(self.ENVIRON, self.logger)
             self.logger.debug("KEYWORD DETECTED. Beginning active listen ")
             self.activeListen()
         #go back to passive listening once ENVIRON["listen"] indicates it is OK
@@ -116,12 +117,12 @@ class listenLoop(object):
         self.logger.debug("waitUntilListen function is now monitoring the ENVIRON listen variable")
         self.interrupted = False
         while True:
-            if self.ENVIRON["listen"]:
+            if busyCheck(self.ENVIRON, self.logger) == False:
                 self.passiveListen()
             time.sleep(.3)
 
 
-    # This function is called when keyword detected and self.ENVIRON["listen"] is True
+    # This function is called when keyword detected and the system is not Busy
     def activeListen(self):
         #Stop our robot and then begin listening actively
         self.SENSORQ.put(['snowboy', 'HALT ROBOT'])
@@ -132,16 +133,16 @@ class listenLoop(object):
         #check whether a valid response was received from the API and send to brain for processing
         if 'APIERROR1' in input:
             self.mic.say('Sorry. I did not understand that.')
-            self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger)
         elif 'APIERROR2' in input:
             self.mic.say('Sorry. There was a problem with the speech to text engine.')
-            self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger)
         elif 'APIERROR3' in input:
             self.mic.say('Hmmn. A timely response was not received from the speech to text engine. Perhaps try again.')
-            self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger)
         elif 'APIERROR4' in input:
             self.mic.say('Sorry. Something went wrong.')
-            self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger)
         else:
             self.SENSORQ.put(['brain', input])
 
@@ -181,4 +182,3 @@ if __name__ == "__main__":
     ENVIRON = testSensor.createEnviron()
     MIC = testSensor.createMic(ENVIRON, 'pico-tts')
     doListen(ENVIRON, SENSORQ, MIC)
-

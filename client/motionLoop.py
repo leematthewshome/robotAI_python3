@@ -17,11 +17,11 @@ import cv2
 import os
 import logging
 import json
-#allow for running listenloop either in isolation or via robotAI.py
+#allow for running sensor either in isolation or via robotAI.py
 try:
-    from client.app_utils import getConfig, getConfigData, sendToRobotAPI
+    from client.app_utils import getConfig, getConfigData, sendToRobotAPI, busyOn, busyCheck
 except:
-    from app_utils import getConfig, getConfigData, sendToRobotAPI
+    from app_utils import getConfig, getConfigData, sendToRobotAPI, busyOn, busyCheck
 
 
 class motionLoop(object):
@@ -97,6 +97,7 @@ class motionLoop(object):
     #============================================================================================
     def createFile(self):
         chatid = self.securitychat
+        self.logger.debug("Pre-fetching new security chat file using %s" % chatid)
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         # temporary fix for 2 part chat IDs (until API fixed)
         arr = chatid.split('-')
@@ -177,21 +178,24 @@ class motionLoop(object):
         file = recordVideo(camera, 3)
         command = 'SECURITYWARN ,%s' % (file)
         self.logger.debug("Posting %s to Queue" % command)
-        self.ENVIRON["listen"] = False
+        # set system to indicate things are busy
+        busyOn(self.ENVIRON, self.logger)
         self.SENSORQ.put(['brain', command])
 
         # trigger Chat then record more video for reaction (if chat ID configured)
         if len(self.securitychat) > 0:
             command = 'CHATFILE:%s:%s' % (self.chatfile, self.securitychat)
             self.logger.debug("Posting %s to Queue" % command)
-            self.ENVIRON["listen"] = False
+            # set system to indicate things are busy
+            busyOn(self.ENVIRON, self.logger)
             self.SENSORQ.put(['brain', command])
         
         #record more video while chat is being executed
         file = recordVideo(camera, 10)
         command = 'SECURITYVIDEO ,%s' % (file)
         self.logger.debug("Posting %s to Queue" % command)
-        self.ENVIRON["listen"] = False
+        # set system to indicate things are busy
+        busyOn(self.ENVIRON, self.logger)
         self.SENSORQ.put(['brain', command])
 
 
@@ -210,7 +214,8 @@ class motionLoop(object):
             self.logger.debug("Motion detected at %s and motion delay has expired" % curDTime)
             
             # Check listen loop to ensure brain is not busy with an event
-            if self.ENVIRON["listen"] == True:
+            #if self.ENVIRON["listen"] == True:
+            if busyCheck(self.ENVIRON, self.logger) == False:
                 command = None
                 # if in security camera mode then capture video
                 #----------------------------------------------
@@ -228,7 +233,8 @@ class motionLoop(object):
                     if diff > datetime.timedelta(minutes=self.chatDelay):
                         self.lastChat = curDTime
                         command = 'CHATBOT:%s' % self.motionChat
-                        self.ENVIRON["listen"] = False
+                        # set system to indicate things are busy
+                        busyOn(self.ENVIRON, self.logger)
                         self.logger.debug("Posting %s to Queue" % command)
                         self.SENSORQ.put(['brain', command])
         # pre-fetch the security chat text to regenerate file
@@ -286,8 +292,8 @@ class motionLoop(object):
         # loop over the frames of the video feed and detect motion
         while True:
             # if we are busy processing a job then skip motion until we are done
-            # (the listen flag is our default indicator that brain is processing something)
-            if self.ENVIRON["listen"] == False:
+            #if self.ENVIRON["listen"] == False:
+            if busyCheck(self.ENVIRON, self.logger) == True:
                 continue
                 
             # grab the current frame and initialize the occupied/unoccupied text
