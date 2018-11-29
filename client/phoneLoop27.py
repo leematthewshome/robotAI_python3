@@ -116,7 +116,19 @@ class SecurityCamera:
 
 
     def call_state_changed(self, core, call, state, message):
-        #print "***DEBUG*** call_state_changed State = " + str(state)
+        # substitutes for python3 app_utils functions to synch python27 and python3
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        folder = os.path.join(self.TOPDIR, 'static/python27/')
+        def busyOff(ENVIRON, logger, folder):
+            filelist = [ f for f in os.listdir(folder) ]
+            for f in filelist:
+                os.remove(os.path.join(folder, f))
+        def busyOn(ENVIRON, logger, folder, filepath, stamp):
+            file = stamp + '.busy'
+            os.rename(filepath, os.path.join(folder, file))
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                
+        self.logger.debug("Call_state_changed State = "" + str(state))
         if state == linphone.CallState.Idle:
             self.logger.debug("The call state is now Idle.")
         if state == linphone.CallState.OutgoingInit:
@@ -129,17 +141,34 @@ class SecurityCamera:
                 self.logger.debug("I was not able to connect your call. The other party may not be connected to the server.")
             else:
                 self.logger.debug("There was some sort of error with the call.")
-            self.ENVIRON["listen"] = True
+            #self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger, folder)
         if state == linphone.CallState.Released:
             self.outgoingCall = False
-            self.ENVIRON["listen"] = True
+            #self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger, folder)
         if state == linphone.CallState.End:
             self.logger.debug("The active call was ended ")
-            self.logger.debug("The call has ended.")
-            self.ENVIRON["listen"] = True
+            #self.ENVIRON["listen"] = True
+            busyOff(self.ENVIRON, self.logger, folder)
         if state == linphone.CallState.IncomingReceived:
-            #TODO Need to check ENVIRON listen flag and return busy tone to the caller if not ready
-
+            #robotAI3 is python3 so create file as signal to interrupt processes
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            stamp = time.strftime("%y%m%d%H%M%S") 
+            file = stamp + '.ask'
+            filepath = os.path.join(folder, file)
+            f = open(filepath, "w+")
+            f.close()
+            #wait and check if python3 process accepted 
+            time.sleep(3)
+            file = stamp + '.yes'
+            filepath = os.path.join(folder, file)
+            if not os.path.isfile(filepath):
+                core.decline_call(call, linphone.Reason.Busy)
+                busyOff(self.ENVIRON, self.logger, folder)
+                return
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            
             #Try to fetch caller details from our contact list
             id = call.remote_address_as_string
             self.logger.debug("Incoming call from " + id)
@@ -150,7 +179,8 @@ class SecurityCamera:
             except:
                 CallWhite = False
             if CallWhite:
-                self.ENVIRON["listen"] = False
+                #self.ENVIRON["listen"] = False
+                busyOn(self.ENVIRON, self.logger, folder, filepath, stamp)
                 self.logger.debug("Accepting call from " + call.remote_address_as_string)
                 #self.MIC.play(self.core.ring)
                 self.logger.debug("Giving snowboy 2 seconds to close the audio connection......")
@@ -170,11 +200,12 @@ class SecurityCamera:
                 self.logger.debug("Rejecting call from " + call.remote_address_as_string)
                 #self.MIC.say("Someone unknown is calling. I am rejecting the call.")
                 core.decline_call(call, linphone.Reason.Declined)
+                #self.ENVIRON["listen"] = True
+                busyOff(self.ENVIRON, self.logger, folder)
                 chat_room = core.get_chat_room_from_uri(self.admin)
                 msg = chat_room.create_message(call.remote_address_as_string + ' tried to call')
                 chat_room.send_chat_message(msg)
-
-
+    
 
     def configure_sip_account(self, username, password):
         # Configure the SIP account
