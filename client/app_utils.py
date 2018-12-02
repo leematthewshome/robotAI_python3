@@ -192,11 +192,34 @@ def testRobotAPI(ENVIRON, mic, logger):
 # Function to check if cam / mic / robot is busy
 # --------------------------------------------------------------------------
 def busyCheck(ENVIRON, logger):
-    # ability to listen is a proxy for busy overall
-    if ENVIRON["listen"] == True:
-        return False 
-    else:
-        return True
+    folder = os.path.join(ENVIRON["topdir"], 'static/python27/')
+    # if request from python27 then 
+    if len(glob.glob(folder + '*.ask')) > 0:   
+        # grant access if we are not busy
+        if ENVIRON["listen"] == True:
+            print("Interrupt request from Python27 detected. Granting permision......................")
+            for file in os.listdir(folder):
+                if file.endswith(".ask"):
+                    base = os.path.splitext(file)[0]
+                    os.rename(folder+file, folder+base+".yes")
+            ENVIRON["listen"] = False
+            return True
+        else:
+            return False
+    # if python27 is done then delete the file and reset listen var
+    elif len(glob.glob(folder + '*.done')) > 0:   
+        print("Python27 is done, deleting lock file and resetting listen......................")
+        filelist = [ f for f in os.listdir(folder) ]
+        for f in filelist:
+            os.remove(os.path.join(folder, f))
+        ENVIRON["listen"] = True
+        return False
+    # else use listen var (ability to listen is a proxy for busy overall)
+    else:   
+        if ENVIRON["listen"] == True:
+            return False 
+        else:
+            return True
 
         
 # Function to flag that cam / mic / robot is busy

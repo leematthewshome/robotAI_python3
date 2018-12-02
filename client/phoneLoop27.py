@@ -59,7 +59,8 @@ class SecurityCamera:
             logging.basicConfig(level=logging.DEBUG)
         else:
             self.logger.level = logging.INFO
-            logging.basicConfig(level=logging.INFO)
+            #logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(level=logging.WARNING)
 
         linphone.set_log_handler(self.log_handler)
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -120,15 +121,18 @@ class SecurityCamera:
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         folder = os.path.join(self.TOPDIR, 'static/python27/')
         def busyOff(ENVIRON, logger, folder):
-            filelist = [ f for f in os.listdir(folder) ]
-            for f in filelist:
-                os.remove(os.path.join(folder, f))
+            print("PHONE Setting busy signal OFF by renaming files .done...............................")
+            for file in os.listdir(folder):
+                #if file.endswith(".busy"):
+                base = os.path.splitext(file)[0]
+                os.rename(folder+file, folder+base+".done")
         def busyOn(ENVIRON, logger, folder, filepath, stamp):
+            print("PHONE Setting busy signal ON by renaming file .busy...............................")
             file = stamp + '.busy'
             os.rename(filepath, os.path.join(folder, file))
         #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 
-        self.logger.debug("Call_state_changed State = "" + str(state))
+        self.logger.debug("Call_state_changed State = " + str(state))
         if state == linphone.CallState.Idle:
             self.logger.debug("The call state is now Idle.")
         if state == linphone.CallState.OutgoingInit:
@@ -160,13 +164,16 @@ class SecurityCamera:
             f = open(filepath, "w+")
             f.close()
             #wait and check if python3 process accepted 
-            time.sleep(3)
+            print("PHONE Phone is waiting for 5 seconds to see if access granted........................")
+            time.sleep(5)
             file = stamp + '.yes'
             filepath = os.path.join(folder, file)
             if not os.path.isfile(filepath):
+                print("PHONE Interrupt not granted. Decline the call....................................")
                 core.decline_call(call, linphone.Reason.Busy)
                 busyOff(self.ENVIRON, self.logger, folder)
                 return
+            print("PHONE Permission granted so lets connect the call....................................")
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             
             #Try to fetch caller details from our contact list
