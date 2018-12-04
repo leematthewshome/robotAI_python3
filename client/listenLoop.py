@@ -117,9 +117,10 @@ class listenLoop(object):
         self.logger.debug("waitUntilListen function is now monitoring the ENVIRON listen variable")
         self.interrupted = False
         while True:
+            self.logger.debug("waitUntilListen - listen variable is %s" % str(self.ENVIRON['listen']))
             if busyCheck(self.ENVIRON, self.logger) == False:
                 self.passiveListen()
-            time.sleep(.3)
+            time.sleep(1)
 
 
     # This function is called when keyword detected and the system is not Busy
