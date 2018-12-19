@@ -101,6 +101,16 @@ def securityWarn(text, mic, ENVIRON, logger):
         motion_email = config["Motion_notifyEmail"]
         motion_phone = config["Motion_notifyPhone"]
         motion_message = config["Motion_notifyText"]
+        # try sending a text message via phone module (need to add logic to check if phone enabled)
+        # maybe replace SMS via AWS with this method
+        if len(motion_phone) > 0:
+            folder = os.path.join(TOPDIR, 'static/python27/')
+            stamp = time.strftime("%y%m%d%H%M%S") 
+            file = stamp + '.text'
+            filepath = os.path.join(folder, file)
+            f = open(filepath, "w+")
+            f.write(motion_phone + ':' + motion_message)
+            f.close()
         # if am email has been configured then send an email
         if len(motion_email) > 0:
             jsonpkg = {"subscriberID": api_login,
@@ -112,6 +122,7 @@ def securityWarn(text, mic, ENVIRON, logger):
             api_url = os.path.join(api_url, 'email')
             response = sendToRobotAPI('POST', api_url, jsonpkg, mic, logger, ENVIRON)                    
         # if a phone number has been configured then send an SMS
+        '''
         if len(motion_phone) > 0:
             jsonpkg = {"subscriberID": api_login,
                   "token": api_token,
@@ -121,7 +132,7 @@ def securityWarn(text, mic, ENVIRON, logger):
                   }
             api_url = os.path.join(api_url, 'sms')
             response = sendToRobotAPI('POST', api_url, jsonpkg, mic, logger, ENVIRON)                    
-    
+        '''
     
 # function to handle motion sensor video file being generated
 #-------------------------------------------------------------------------
