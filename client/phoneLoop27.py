@@ -20,7 +20,7 @@ import threading
 from app_utils import getConfig, getConfigData, sendToRobotAPI, busyOn, busyCheck
 
 
-class SecurityCamera:
+class PhoneSensor:
 
     #def __init__(self, ENVIRON, SENSORQ, MIC, snd_playback=''):
     def __init__(self, ENVIRON, snd_playback=''):
@@ -275,11 +275,27 @@ class SecurityCamera:
                 self.logger.debug( "Creating a call to " + self.ENVIRON["callee"])
                 self.create_call(self.ENVIRON["callee"])
                 self.ENVIRON["callee"] = None
+            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            # check every 5 second for file to see if text message is required 
+            if float(cnt/50).is_integer():
+                folder = os.path.join(self.TOPDIR, 'static/python27/')
+                for file in os.listdir(folder):
+                    if file.endswith(".text"):
+                        f = open(os.path.join(folder, file), "r")
+                        if f.mode == 'r':
+                            text = f.read()
+                            f.close()
+                            arr = text.split(':')
+                            chat_room = self.core.get_chat_room_from_uri(arr[0])
+                            msg = chat_room.create_message(arr[1])
+                            chat_room.send_chat_message(msg)
+                        os.remove(os.path.join(folder, file))
+
 
 
 
 def doSensor(ENVIRON):
-    cam = SecurityCamera(ENVIRON)
+    cam = PhoneSensor(ENVIRON)
     cam.run()
 
     
