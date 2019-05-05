@@ -10,7 +10,7 @@ This is a work in progress.
 
 --install required libraries for audio onto raspberry pi
 
-sudo apt-get install python3-pyaudio python-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
+sudo apt-get install python3-pyaudio python-dev python3-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
 
 sudo pip3 install pyaudio
 
