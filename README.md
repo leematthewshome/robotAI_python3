@@ -6,6 +6,12 @@ This is a work in progress.
 
 # Instructions to install necessary pre-requisites and libraries
 
+--start by updating your environment
+
+sudo apt-get update
+
+sudo apt-get upgrade
+
 --Note that some of these libraries and applications might already be installed on your image. If so then no problem.
 
 --install required libraries for audio onto raspberry pi
