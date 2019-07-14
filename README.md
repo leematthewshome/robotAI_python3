@@ -3,6 +3,7 @@ Upgrade of This Robot AI home automation and robotics platform to Python3. For m
 
 This is a work in progress. 
 
+--Note that some of these libraries and applications might already be installed on your image. If so then no problem.
 
 # Instructions to install necessary pre-requisites and libraries
 
@@ -12,37 +13,41 @@ sudo apt-get update
 
 sudo apt-get upgrade
 
---Note that some of these libraries and applications might already be installed on your image. If so then no problem.
+--Installation of prerequisites for snowboy hotword detector
+
+sudo apt-get install python-pyaudio python3-pyaudio sox
+
+pip3 install pyaudio
+
+sudo apt-get install libatlas-base-dev
 
 --install required libraries for audio onto raspberry pi
 
-sudo apt-get install python3-pyaudio python-dev python3-dev libportaudio-dev libasound2-dev libatlas-base-dev bison -y
+sudo apt-get install python-dev libportaudio-dev libasound2-dev  bison -y
 
-sudo pip3 install pyaudio
+sudo apt-get install espeak -y
 
---install text to speech software 
+--install pico text to speech software (seems no longer available for latest raspbian)
 
-sudo apt-get install espeak flite libttspico0 libttspico-utils libttspico-data -y
-
---install software for playing music
-
-sudo apt-get install mplayer -y
+#sudo apt-get install espeak flite libttspico0 libttspico-utils libttspico-data -y
 
 --install flask, which is required for local web pages to configure system
 
 sudo pip3 install flask
 
---install socketIO_client, which is only required for the module that maintains a socket connection to the server
+--install software for playing music
+
+sudo apt-get install mplayer -y
+
+--install socket client, for the (IN DEVELOPMENT) websocket sensor
 
 sudo pip3 install socketIO-client
 
---install open-cv (computer vision), which is only required for the motion sensor module
+--install open-cv (computer vision) required for the motion sensor module
 
 sudo pip3 install imutils
 
-sudo pip3 install opencv-python
-
-sudo apt-get install libatlas-base-dev, libjasper-dev, libqtgui4, libqt4-test, python3-pyqt5 -y
+sudo apt-get install python3-opencv
 
 --install pythion libraries leveraged by various modules
 
@@ -51,6 +56,7 @@ sudo pip3 install PyDictionary
 sudo pip3 install requests  
 
 sudo pip3 install pyserial   
+
 
 # Instructions to install This Robot AI software
 
