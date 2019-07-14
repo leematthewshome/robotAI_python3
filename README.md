@@ -1,7 +1,7 @@
 # robotAI_python3
 Upgrade of This Robot AI home automation and robotics platform to Python3. For more details reference the RobotAI website here https://thisrobotai.com/
 
-This is a work in progress. 
+This is a work in progress. Available packages seem to change over time. These instructions worked for Raspbian Buster as at 14/07/2019
 
 --Note that some of these libraries and applications might already be installed on your image. If so then no problem.
 
