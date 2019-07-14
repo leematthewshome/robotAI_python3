@@ -208,7 +208,7 @@ class motionLoop(object):
         self.logger.debug("Motion detected at %s " % curDTime)
         diff = curDTime - lastAlert
         if (diff.seconds) < self.delay:
-            self.logger.debug("Motion delay has not expired. %s seconds remaining." % diff.seconds)                
+            self.logger.debug("Motion delay has not expired. %s seconds remaining." % str(self.delay - diff.seconds)  )              
         else:
             lastAlert = curDTime
             self.logger.debug("Motion detected at %s and motion delay has expired" % curDTime)
@@ -318,7 +318,11 @@ class motionLoop(object):
             firstFrame = gray
             # dilate the thresholded image to fill in holes, then find contours on thresholded image
             thresh = cv2.dilate(thresh, None, iterations=2)
-            ( cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            #open CV seems to change the number of params returned
+            try:
+                (img, cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+            except:
+                (cnts, _) = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
             # loop over the contours
             for c in cnts:
