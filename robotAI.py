@@ -15,9 +15,9 @@ import logging
 import socket
 
 #import essential client modules
-from client.app_utils import getConfig, getConfigData, uzbl_goto, sendToRobotAPI
-from client import tts, stt, brain
 from client import mic
+from client import tts, stt, brain
+from client.app_utils import getConfig, getConfigData, uzbl_goto, sendToRobotAPI
 
 
 #---------------------------------------------------------
