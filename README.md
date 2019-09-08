@@ -13,6 +13,12 @@ sudo apt-get update
 
 sudo apt-get upgrade
 
+-- upgrade PIP to latest version
+
+wget https://bootstrap.pypa.io/get-pip.py
+
+sudo python3 get-pip.py
+
 --Installation of prerequisites for snowboy hotword detector
 
 sudo apt-get install python-pyaudio python3-pyaudio sox portaudio19-dev
@@ -47,7 +53,7 @@ sudo pip3 install socketIO-client
 
 sudo pip3 install imutils
 
-sudo apt-get install python3-opencv
+sudo pip install opencv-contrib-python
 
 --install pythion libraries leveraged by various modules
 
