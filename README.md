@@ -15,7 +15,7 @@ sudo apt-get upgrade
 
 --Installation of prerequisites for snowboy hotword detector
 
-sudo apt-get install python-pyaudio python3-pyaudio sox
+sudo apt-get install python-pyaudio python3-pyaudio sox portaudio19-dev
 
 pip3 install pyaudio
 
